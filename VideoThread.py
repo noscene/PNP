@@ -1,5 +1,5 @@
 import cv2 
-
+import numpy as np
 
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
@@ -17,7 +17,8 @@ class VideoThread(QThread):
             ret, frame = cap.read()
             if ret:
                 # https://stackoverflow.com/a/55468544/6622587
-                rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                rgbImage2=self.searchForRectangles(frame)
+                rgbImage = cv2.cvtColor(rgbImage2, cv2.COLOR_BGR2RGB)
                 h, w, ch = rgbImage.shape
                 self.draw_crosshair(rgbImage,w,h)
                 bytesPerLine = ch * w
@@ -87,3 +88,105 @@ class VideoThread(QThread):
        y = int( center[1] - height/2 )
        image = image[ y:y+height, x:x+width ]
        return image   
+    
+    def searchForRectangles(self, frame0):
+
+
+        parms={ 'h_min' : 0,    's_min' : 0 ,   'v_min'  : 102 ,
+                'h_max' : 179,  's_max' : 255,  'v_max'  : 255 ,
+                'a_fac' : 8,    'a_lim' : 66,
+                'canny_thrs1' : 150,  'canny_thrs2' : 255,
+                'dilate_count' : 8,   'erode_count' : 6,
+                'gauss_v1' : 3,       'gauss_v2' : 3 }
+
+        kernel = np.ones((5,5),np.uint8)
+
+        imgHSV      = cv2.cvtColor(frame0,cv2.COLOR_BGR2HSV)
+        imgHSV2     = cv2.GaussianBlur(imgHSV,(parms['gauss_v1'],parms['gauss_v2']),cv2.BORDER_DEFAULT)
+        lower       = np.array([parms['h_min'],parms['s_min'],parms['v_min']])
+        upper       = np.array([parms['h_max'],parms['s_max'],parms['v_max']])
+        mask        = cv2.inRange(imgHSV2,lower,upper)
+        imgResult   = cv2.bitwise_and(frame0,frame0,mask=mask)
+        gray2       = cv2.cvtColor(imgResult, cv2.COLOR_BGR2GRAY) 
+        gray        = cv2.GaussianBlur(gray2,(parms['gauss_v1'],parms['gauss_v2']),cv2.BORDER_DEFAULT)
+        edged       = cv2.Canny(gray, parms['canny_thrs1'], parms['canny_thrs2']) 
+        imgDilation = cv2.dilate(edged, kernel, iterations = parms['dilate_count'])    
+        imgEroded   = cv2.erode(imgDilation, kernel, iterations = parms['erode_count'])
+
+        contours, hierarchy = cv2.findContours(imgEroded, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE) 
+
+        cnt_rects = 0
+        cnt_rects2 = 0
+        boxes = []
+        apdb = 1.0 / (parms['a_fac']+1)
+        imgContour = frame0.copy()    
+        
+        angle= 0.0
+        
+        for contour in contours:
+            # https://stackoverflow.com/questions/34237253/detect-centre-and-angle-of-rectangles-in-an-image-using-opencv/34285205
+            myarea = cv2.contourArea(contour)
+            if myarea > (parms['a_lim'] * 24) :
+                cv2.drawContours(imgContour, contour, -1, (0, 0, 200), 3)
+                peri = cv2.arcLength(contour,True)
+                approx = cv2.approxPolyDP(contour, apdb * peri,True)
+                alpha = 0
+                cX=0
+                cY=0
+                if( len(approx) == 4 or len(approx) == 24 ): # avoid div/0
+                    M = cv2.moments(approx)
+
+                    if(M["m00"] > 0): # avoid div/0 again
+                        cX = int(M["m10"] / M["m00"])
+                        cY = int(M["m01"] / M["m00"])
+                        cv2.circle(imgContour, (cX, cY), 12, (0, 255, 0), -1)
+                        
+                    # draw min Rect rotated
+                    rect = cv2.minAreaRect(approx)
+                    
+                    # https://www.pyimagesearch.com/2017/02/20/text-skew-correction-opencv-python/
+                    angle = rect[-1]
+                    if angle < -45: angle = -(90 + angle)
+                    else:           angle = -angle
+                        
+                        
+                    # TODO eval rotation by max(w),max(h)
+                    
+                    # Just for visual
+                    box = cv2.boxPoints(rect)
+                    box = np.int0(box)
+                    cv2.drawContours(imgContour,[box],0,(0,128,255),2)                
+                    
+                    cv2.drawContours(imgContour, approx, -1, (0, 0, 255), 20)
+                    objCor = len(approx)
+                    x1, y1, w1, h1 = cv2.boundingRect(approx)
+                    cv2.putText(imgContour, str(objCor) + ' ' + str(round(angle,1)) + ' ' + str(cX) + ' ' + str(cY)
+                                , (x1,y1), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255,255,255), 2, cv2.LINE_AA)
+                
+                    # check orientation , real size
+                    #        (x,y,w,h) = cv2.boundingRect(contour)
+                    #        if(w > 50 and w <500 and h < w * 0.6 and h > w * 0.4  ):
+                    #            boxes.append([x, y, w, h])
+                    #            cnt_rects+=1
+                    #        else:
+                    #            cnt_rects2+=1
+
+        
+
+        imgstack = self.stackImages(0.3, (  [edged,         frame0,  mask],
+                                            [imgContour,    imgHSV, imgEroded] ) )
+
+        #cv2.imshow('nanoCam',imgstack)
+        
+        #imgContour2 = cv2.resize(imgContour, (1024, 768))
+        #cv2.imshow('nanoCam2',imgContour2)
+        
+        
+        #mykey = cv2.waitKey(1)
+        #if(mykey == ord('q')): break
+        #if(mykey == ord('p')):
+        #    plt.imshow(imgstack)
+        #    plt.show()
+        #    plt.imshow(imgContour)
+        #    plt.show()
+        return imgstack
