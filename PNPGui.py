@@ -28,6 +28,9 @@ class ButtonBlock(QtWidgets.QWidget):
         # print ("ButtonClicked",self.row)
         self.action(self.row)
 
+
+
+
 class PNPGui():
     def __init__(self,ui,gcode):
         self.ui=ui
@@ -46,10 +49,32 @@ class PNPGui():
         self.th.changePixmap.connect(self.th.setImageToGUI)
         self.th.start()
     
+        self.ui.slider_h_min.valueChanged.connect(self.changeSlider_h_min)
+        self.ui.slider_s_min.valueChanged.connect(self.changeSlider_s_min)
+        self.ui.slider_v_min.valueChanged.connect(self.changeSlider_v_min)
 
+        self.ui.slider_h_max.valueChanged.connect(self.changeSlider_h_max)
+        self.ui.slider_s_max.valueChanged.connect(self.changeSlider_s_max)
+        self.ui.slider_v_max.valueChanged.connect(self.changeSlider_v_max)
 
+        self.visionParms={      'h_min' : 0,    's_min' : 0 ,   'v_min'  : 102 ,
+                                'h_max' : 179,  's_max' : 255,  'v_max'  : 255 ,
+                                'a_fac' : 8,    'a_lim' : 66,
+                                'canny_thrs1' : 150,  'canny_thrs2' : 255,
+                                'dilate_count' : 8,   'erode_count' : 6,
+                                'gauss_v1' : 3,       'gauss_v2' : 3 }
     #
     #
+    def changeSlider_h_min(self):      self.th.parms['h_min'] = self.ui.slider_h_min.value()
+    def changeSlider_s_min(self):      self.th.parms['s_min'] = self.ui.slider_s_min.value()
+    def changeSlider_v_min(self):      self.th.parms['v_min'] = self.ui.slider_v_min.value()
+
+    def changeSlider_h_max(self):      self.th.parms['h_max'] = self.ui.slider_h_max.value()
+    def changeSlider_s_max(self):      self.th.parms['s_max'] = self.ui.slider_s_max.value()
+    def changeSlider_v_max(self):      self.th.parms['v_max'] = self.ui.slider_v_max.value()
+
+    def changeSlider_a_fac(self):      self.th.parms['a_fac'] = self.ui.slider_a_fac.value()
+
     #
     #
     def setFootprintTable(self):

@@ -8,6 +8,16 @@ from PyQt5.QtCore import *
 class VideoThread(QThread):
     changePixmap = pyqtSignal(QImage)
 
+    def __init__(self):
+        super(QThread, self).__init__()
+        self.parms={    'h_min' : 0,    's_min' : 0 ,   'v_min'  : 102 ,
+                        'h_max' : 179,  's_max' : 255,  'v_max'  : 255 ,
+                        'a_fac' : 8,    'a_lim' : 66,
+                        'canny_thrs1' : 150,  'canny_thrs2' : 255,
+                        'dilate_count' : 8,   'erode_count' : 6,
+                        'gauss_v1' : 3,       'gauss_v2' : 3 }
+
+
     def setImageToGUI(self, image):
         self.myVideoFrame.setPixmap(QPixmap.fromImage(image))
 
@@ -18,6 +28,7 @@ class VideoThread(QThread):
             if ret:
                 # https://stackoverflow.com/a/55468544/6622587
                 rgbImage2=self.searchForRectangles(frame)
+
                 rgbImage = cv2.cvtColor(rgbImage2, cv2.COLOR_BGR2RGB)
                 h, w, ch = rgbImage.shape
                 self.draw_crosshair(rgbImage,w,h)
@@ -92,12 +103,7 @@ class VideoThread(QThread):
     def searchForRectangles(self, frame0):
 
 
-        parms={ 'h_min' : 0,    's_min' : 0 ,   'v_min'  : 102 ,
-                'h_max' : 179,  's_max' : 255,  'v_max'  : 255 ,
-                'a_fac' : 8,    'a_lim' : 66,
-                'canny_thrs1' : 150,  'canny_thrs2' : 255,
-                'dilate_count' : 8,   'erode_count' : 6,
-                'gauss_v1' : 3,       'gauss_v2' : 3 }
+        parms=self.parms
 
         kernel = np.ones((5,5),np.uint8)
 
@@ -123,6 +129,8 @@ class VideoThread(QThread):
         
         angle= 0.0
         
+        objNumber=0
+
         for contour in contours:
             # https://stackoverflow.com/questions/34237253/detect-centre-and-angle-of-rectangles-in-an-image-using-opencv/34285205
             myarea = cv2.contourArea(contour)
@@ -135,6 +143,8 @@ class VideoThread(QThread):
                 cY=0
                 if( len(approx) == 4 or len(approx) == 24 ): # avoid div/0
                     M = cv2.moments(approx)
+
+                    objNumber+=1
 
                     if(M["m00"] > 0): # avoid div/0 again
                         cX = int(M["m10"] / M["m00"])
@@ -158,9 +168,9 @@ class VideoThread(QThread):
                     cv2.drawContours(imgContour,[box],0,(0,128,255),2)                
                     
                     cv2.drawContours(imgContour, approx, -1, (0, 0, 255), 20)
-                    objCor = len(approx)
+                    objCor = len(approx)    # Kanten anzahl
                     x1, y1, w1, h1 = cv2.boundingRect(approx)
-                    cv2.putText(imgContour, str(objCor) + ' ' + str(round(angle,1)) + ' ' + str(cX) + ' ' + str(cY)
+                    cv2.putText(imgContour, str(objNumber) + ' ' + str(round(angle,1)) + ' ' + str(cX) + ' ' + str(cY)
                                 , (x1,y1), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255,255,255), 2, cv2.LINE_AA)
                 
                     # check orientation , real size
