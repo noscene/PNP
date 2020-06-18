@@ -102,6 +102,7 @@ class VideoThread(QThread):
     
     def searchForRectangles(self, frame0):
 
+        #use cv2.flip(frame,1) -> spiegelt für BottomCam Später und Overlayzu bauen auf PCB
 
         parms=self.parms
 
