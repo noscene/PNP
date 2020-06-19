@@ -1,6 +1,7 @@
 import time
 import copy
 import cv2
+import math
 import numpy as np
 
 scale = 3.0   # just for test zoom, should be 1.0
@@ -10,6 +11,13 @@ base = 720     # this is screen height, need to flip cords
 #    def __init__(self,x,y):
 #        self.x_mm = x 
 #        self.y_mm = y 
+
+
+class Point():
+    def __init__(self,x,y):
+        self.x = float(x)
+        self.y = float(y)
+        print("Point",x,y)
 
 class PNPImageBase(): # just a helper to draw smd parts, panels etc on opencv window
     def drawRect(self,img,x,y,w,h,color,width):
@@ -161,12 +169,12 @@ class PNPFeederSet(PNPImageBase):
 #m.driveto((c[0],c[1]))
 
 # thx @flo ;-)
-def convertRect(my_fd0,my_fd1,my_id0):
-    r_fd0_x = 68.1 # X68.1 Y54.9
-    r_fd0_y = 54.9
-
-    r_fd1_x = 31.2 #X31.2 Y87.0
-    r_fd1_y = 87.0
+def convertRect(my_fd0,my_fd1,my_id0, 
+                r_fd0_x = 68.1, r_fd0_y = 54.9,
+                r_fd1_x = 31.2, r_fd1_y = 87.0):
+     # X68.1 Y54.9
+     #X31.2 Y87.0
+    
 
     # SCHRITT 1: Hilfswerte Berechnen
     # Distanz A-B
@@ -175,64 +183,64 @@ def convertRect(my_fd0,my_fd1,my_id0):
     #print('abDistance1' , abDistance1)
 
     # Mitte des Rects
-    middle1_x = my_fd0.x + ((my_fd1.x - my_fd0.x) / 2.0);
-    middle1_y = my_fd0.y + ((my_fd1.y - my_fd0.y) / 2.0);
+    middle1_x = my_fd0.x + ((my_fd1.x - my_fd0.x) / 2.0)
+    middle1_y = my_fd0.y + ((my_fd1.y - my_fd0.y) / 2.0)
     #print('middle1' , middle1_x,middle1_y)
 
     # SCHRITT 2: Rect1 (A, B & P) auf lokales Koordinatensystem umrechnen
-    r1Local_a_x = my_fd0.x - middle1_x;
-    r1Local_a_y = my_fd0.y - middle1_y;
-    r1Local_b_x = my_fd1.x - middle1_x;
-    r1Local_b_y = my_fd1.y - middle1_y;
-    r1Local_p_x = my_id0.x - middle1_x;
-    r1Local_p_y = my_id0.y - middle1_y;
+    r1Local_a_x = my_fd0.x - middle1_x
+    r1Local_a_y = my_fd0.y - middle1_y
+    r1Local_b_x = my_fd1.x - middle1_x
+    r1Local_b_y = my_fd1.y - middle1_y
+    r1Local_p_x = my_id0.x - middle1_x
+    r1Local_p_y = my_id0.y - middle1_y
     #print('r1Local a' , r1Local_a_x,r1Local_a_y)
     #print('r1Local b' , r1Local_b_x,r1Local_b_y)
     #print('r1Local p' , r1Local_p_x,r1Local_p_y)
 
     # SCHRITT 3: Winkel zwischen P & A berechnen
-    angle1 = math.atan2(r1Local_p_y, r1Local_p_x) - math.atan2(r1Local_a_y, r1Local_a_x);
+    angle1 = math.atan2(r1Local_p_y, r1Local_p_x) - math.atan2(r1Local_a_y, r1Local_a_x)
     #Länge von Mitte zu P berechnen
-    pLength1 = math.sqrt((r1Local_p_x * r1Local_p_x) + (r1Local_p_y * r1Local_p_y));
+    pLength1 = math.sqrt((r1Local_p_x * r1Local_p_x) + (r1Local_p_y * r1Local_p_y))
     print('angle1 p' , angle1 * (180.0 / math.pi) )
     #print('pDistance1' , pLength1 )
 
     #SCHRITT 4: Wiederhole 1 & 2 mit Ziel-Rect, ohne Punkt P
     #Distanz A-B
-    abDistance2 = math.sqrt( (r_fd1_x - r_fd0_x) * (r_fd1_x - r_fd0_x) + (r_fd1_y - r_fd0_y) * (r_fd1_y - r_fd0_y));
+    abDistance2 = math.sqrt( (r_fd1_x - r_fd0_x) * (r_fd1_x - r_fd0_x) + (r_fd1_y - r_fd0_y) * (r_fd1_y - r_fd0_y))
     #print('abDistance2' , abDistance2 )
 
     #Mitte des Rects
-    middle2_x = r_fd0_x + ((r_fd1_x - r_fd0_x) / 2.0);
-    middle2_y = r_fd0_y + ((r_fd1_y - r_fd0_y) / 2.0);
+    middle2_x = r_fd0_x + ((r_fd1_x - r_fd0_x) / 2.0)
+    middle2_y = r_fd0_y + ((r_fd1_y - r_fd0_y) / 2.0)
     #print('middle2' , middle2_x,middle2_y )
 
     # Rect2 (A & B) auf lokales Koordinatensystem umrechnen
-    r2Local_a_x = r_fd0_x - middle2_x;
-    r2Local_a_y = r_fd0_y - middle2_y;
-    r2Local_b_x = r_fd1_x - middle2_x;
-    r2Local_b_y = r_fd1_y - middle2_y;
+    r2Local_a_x = r_fd0_x - middle2_x
+    r2Local_a_y = r_fd0_y - middle2_y
+    r2Local_b_x = r_fd1_x - middle2_x
+    r2Local_b_y = r_fd1_y - middle2_y
     #print('r2Local a' , r2Local_a_x,r2Local_a_y )
     #print('r2Local b' , r2Local_b_x,r2Local_b_y )
 
     # SCHRITT 5: Richtungsvektor für P2 berechnen
-    p2Direction_x = r2Local_a_x * math.cos(angle1) - r2Local_a_y * math.sin(angle1);
-    p2Direction_y = r2Local_a_x * math.sin(angle1) + r2Local_a_y * math.cos(angle1);
+    p2Direction_x = r2Local_a_x * math.cos(angle1) - r2Local_a_y * math.sin(angle1)
+    p2Direction_y = r2Local_a_x * math.sin(angle1) + r2Local_a_y * math.cos(angle1)
     # in Einheitsvektor (Länge 1) umwandeln
-    pLength2 = math.sqrt((p2Direction_x * p2Direction_x) + (p2Direction_y * p2Direction_y));
-    p2Direction_x = p2Direction_x / pLength2;
-    p2Direction_y = p2Direction_y / pLength2;
+    pLength2 = math.sqrt((p2Direction_x * p2Direction_x) + (p2Direction_y * p2Direction_y))
+    p2Direction_x = p2Direction_x / pLength2
+    p2Direction_y = p2Direction_y / pLength2
 
     # SCHRITT 6: Länge des P-Vektors anpassen
     # Skalierung von Rect1 zu Rect 2 berechnen
-    scaleFactor = abDistance2 / abDistance1;
+    scaleFactor = abDistance2 / abDistance1
 
     #P2-Richtungsvektor mit ursprünglicher Länge und Skalierung multiplizieren
-    p2_x = p2Direction_x * pLength1 * scaleFactor;
-    p2_y = p2Direction_y * pLength1 * scaleFactor;
+    p2_x = p2Direction_x * pLength1 * scaleFactor
+    p2_y = p2Direction_y * pLength1 * scaleFactor
     # SCHRITT 7: P in ursprüngliches Koordinatensystem zurückrechnen
-    p2_x = middle2_x + p2_x;
-    p2_y = middle2_y + p2_y;
+    p2_x = middle2_x + p2_x
+    p2_y = middle2_y + p2_y
 
     print('r2Local b' , p2_x,p2_y )    
     return (p2_x,p2_y)

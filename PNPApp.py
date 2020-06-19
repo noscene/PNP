@@ -22,7 +22,7 @@ def main():
     gui.df_footprints['Feeder']='1'
     gui.df_footprints['Nozzle']='1'
 
-    gui.df_parts = pd.read_csv('SND_Modul_034.mnt', sep="\s+", names=["PART","X","Y","R","Value","Footprint"] )
+    gui.df_parts = pd.read_csv('test_m104.mnt', sep="\s+", names=["PART","X","Y","R","Value","Footprint"] )
 
     gui.setFootprintTable()
     gui.showPartList()

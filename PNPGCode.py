@@ -133,21 +133,21 @@ class PNPGCode():
     def update_z_position_relative(self,nz):      self.driveZ(self.z+nz)
 
     # Setup UI Stuff    
-    def gc_up1(self):       self.update_position_relative(0,1)
-    def gc_up10(self):      self.update_position_relative(0,10)
-    def gc_up100(self):     self.update_position_relative(0,100)
+    def gc_up1(self):       self.update_position_relative(0,0.3)
+    def gc_up10(self):      self.update_position_relative(0, 6)
+    def gc_up100(self):     self.update_position_relative(0,60)
 
-    def gc_down1(self):     self.update_position_relative(0,-1)
-    def gc_down10(self):    self.update_position_relative(0,-10)
-    def gc_down100(self):   self.update_position_relative(0,-100)
+    def gc_down1(self):     self.update_position_relative(0,-0.3)
+    def gc_down10(self):    self.update_position_relative(0,-6)
+    def gc_down100(self):   self.update_position_relative(0,-60)
 
-    def gc_left1(self):     self.update_position_relative(-1,0)
-    def gc_left10(self):    self.update_position_relative(-10,0)
-    def gc_left100(self):   self.update_position_relative(-100,0)
+    def gc_left1(self):     self.update_position_relative(-0.3,0)
+    def gc_left10(self):    self.update_position_relative(-6,0)
+    def gc_left100(self):   self.update_position_relative(-60,0)
 
-    def gc_right1(self):    self.update_position_relative(1,0)
-    def gc_right10(self):   self.update_position_relative(10,0)
-    def gc_right100(self):  self.update_position_relative(100,0)
+    def gc_right1(self):    self.update_position_relative(0.3,0)
+    def gc_right10(self):   self.update_position_relative(6,0)
+    def gc_right100(self):  self.update_position_relative(60,0)
 
     def gc_rot1(self):    self.update_rotation_relative(1)
     def gc_rot_1(self):   self.update_rotation_relative(-1)
@@ -161,7 +161,7 @@ class PNPGCode():
 
     def gc_go_absolute(self):
         print(self.ui.gc_mpos_x.text(),self.ui.gc_mpos_y.text())
-        self.driveto((int(self.ui.gc_mpos_x.text()) , int(self.ui.gc_mpos_y.text())))
+        self.driveto((float(self.ui.gc_mpos_x.text()) , float(self.ui.gc_mpos_y.text())))
         self.ui.gc_mpos_x.setText(str(self.x ))
         self.ui.gc_mpos_y.setText(str(self.y ))        
 

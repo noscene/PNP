@@ -29,7 +29,7 @@ class VideoThread(QThread):
                 # https://stackoverflow.com/a/55468544/6622587
                 rgbImage2=self.searchForRectangles(frame)
 
-                rgbImage = cv2.cvtColor(rgbImage2, cv2.COLOR_BGR2RGB)
+                rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 h, w, ch = rgbImage.shape
                 self.draw_crosshair(rgbImage,w,h)
                 bytesPerLine = ch * w

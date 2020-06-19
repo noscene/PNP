@@ -102,7 +102,7 @@ class PNPGui():
             grid.setItem(index,3,QtWidgets.QTableWidgetItem(str(row['Y']))) 
             grid.setItem(index,4,QtWidgets.QTableWidgetItem(str(row['H']))) 
             grid.setItem(index,5,QtWidgets.QTableWidgetItem(str(row['Nozzle']))) 
-            grid.setCellWidget(index, 6, ButtonBlock("go",row, self.onGoButtonPartlist))
+            grid.setCellWidget(index, 6, ButtonBlock("go",row, self.onGoButtonFootprint))
         grid.itemChanged.connect(self.changeFootprintItemn)
 
     def changeFootprintItemn(self,item):
@@ -114,6 +114,8 @@ class PNPGui():
             self.df_footprints.at[row, col_name] = item.text()
         except:
             print ("changeFootprintItemn ERROR invalid value",row,col,col_name,item.text())
+    def onGoButtonFootprint(self,item):
+        print("onGoButtonFootprint",item)
 
     #
     #
@@ -160,11 +162,31 @@ class PNPGui():
             self.showPartList()   # restore list
 
     def onGoButtonPartlist(self,row):
-        print("onGoButtonPartlist",row)
+        print("onGoButtonPartlist",row['X'],row['Y'])
+        # Query nativ positions
+        fd0_x = float(self.fiducials.query('Fiducial == "FD0" and PCB == 0 ').iloc[0]['X'])
+        fd0_y = float(self.fiducials.query('Fiducial == "FD0" and PCB == 0 ').iloc[0]['Y'])
+        fd1_x = float(self.fiducials.query('Fiducial == "FD1" and PCB == 0 ').iloc[0]['X'])
+        fd1_y = float(self.fiducials.query('Fiducial == "FD1" and PCB == 0 ').iloc[0]['Y'])
+        if ( fd0_x==0 or fd0_y==0 or fd1_x==0 or fd1_y==0 ):
+            print("LERN first fiducials",fd0_x,fd0_y,fd1_x,fd1_y)
+        
+        bom_fd0_x = self.df_parts.query('PART == "FD1" ').iloc[0]['X']
+        bom_fd0_y = self.df_parts.query('PART == "FD1" ').iloc[0]['Y']
+        bom_fd1_x = self.df_parts.query('PART == "FD2" ').iloc[0]['X']
+        bom_fd1_y = self.df_parts.query('PART == "FD2" ').iloc[0]['Y']
+        print("bom fiducials ",bom_fd0_x,bom_fd0_y,bom_fd1_x,bom_fd1_y)
+
+        F1=Point(bom_fd0_x, bom_fd0_y)
+        F2=Point(bom_fd1_x, bom_fd1_y)
+        D=Point(  row['X'],row['Y'])
 
 
+        print(F1)
+        pos_to_move = convertRect(F1,F2,D,fd0_x,fd0_y,fd1_x,fd1_y) #
+        print("pos_to_move",pos_to_move[0],pos_to_move[1])
 
-
+        self.gcode.driveto(( pos_to_move[0] , pos_to_move[1] ))                          
 
     #
     #
@@ -177,8 +199,8 @@ class PNPGui():
         pcb=0
         for p in range(pannel_x * pannel_y):
             # TODO: dont overwrite existing Fiducial Cords!
-            d.append((pcb ,'FD0', 0.0, 0.0))
-            d.append((pcb ,'FD1', 0.0, 0.0))
+            d.append((pcb ,'FD0', 68.39 , 51.6))
+            d.append((pcb ,'FD1', 31.50,  83.4))
             pcb+=1
         # print(d)
         self.fiducials  = pd.DataFrame(d, columns=('PCB','Fiducial','X','Y'))
@@ -186,10 +208,10 @@ class PNPGui():
 
     def showPannelFiducialList(self):
         grid = self.ui.fiducial_table 
-        self.fiducials_list_headers = ['PCB','Fiducial','X','Y', 'Set']
+        self.fiducials_list_headers = ['PCB','Fiducial','X','Y', 'Set','Go']
         try: grid.itemChanged.disconnect() # avoid any msg when redraw
         except Exception: pass
-        grid.setColumnCount(5)
+        grid.setColumnCount(6)
         grid.setHorizontalHeaderLabels(self.fiducials_list_headers)
         grid.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
         # print(self.fiducials)
@@ -201,6 +223,7 @@ class PNPGui():
             grid.setItem(index,2,QtWidgets.QTableWidgetItem(str(row['X']))) 
             grid.setItem(index,3,QtWidgets.QTableWidgetItem(str(row['Y']))) 
             grid.setCellWidget(index, 4, ButtonBlock("Set",(index,row), self.onSetButtonFiducial))
+            grid.setCellWidget(index, 5, ButtonBlock("Go",(index,row), self.onGoButtonFiducial))
         grid.itemChanged.connect(self.changeFiducialItem)
         self.showPreviewPannel()
     
@@ -214,6 +237,11 @@ class PNPGui():
         except:
             print ("changeFiducialItem ERROR invalid value",row,col,col_name,item.text())
             self.showPartList()   
+    def onGoButtonFiducial(self,callbackData):
+        index = callbackData[0]
+        row = callbackData[1]
+        print("onGoButtonFiducial",row['X'],row['Y'])
+        self.gcode.driveto(( float(row['X']) , float(row['Y']) ))                          
 
     def onSetButtonFiducial(self,callbackData):
         index = callbackData[0]
