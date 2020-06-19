@@ -47,6 +47,7 @@ class PNPGui():
         
         self.ui.pannel_update_bt.clicked.connect(self.loadFiducialList)
 
+        self.ui.tabs.currentChanged.connect(self.onTabChange)
 
 
         # configure Video Thread
@@ -78,6 +79,9 @@ class PNPGui():
     def changeSlider_v_max(self):      self.th.parms['v_max'] = self.ui.slider_v_max.value()
     def changeSlider_a_fac(self):      self.th.parms['a_fac'] = self.ui.slider_a_fac.value()
 
+
+    def onTabChange(self,i):
+        print("onTabChange TODO refresh Data on this event: ",i)
     #
     #
     def setFootprintTable(self):
@@ -86,7 +90,7 @@ class PNPGui():
         try: grid.itemChanged.disconnect() # avoid any msg when redraw
         except Exception: pass
         df = self.df_footprints
-        self.footprint_list_headers = ['Footprint','X', 'Y', 'H','Feeder','Nozzle','GoFeeder']
+        self.footprint_list_headers = ['Feeder','Footprint','X', 'Y', 'H','Nozzle','GoFeeder']
         grid.setColumnCount(7)
         grid.setHorizontalHeaderLabels(self.footprint_list_headers)
         grid.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
@@ -104,7 +108,12 @@ class PNPGui():
     def changeFootprintItemn(self,item):
         row = item.row()
         col = item.column()
-        print ("changeItemn",row,col,item.text())
+        col_name = self.footprint_list_headers[col]
+        # print ("changePartItemn",row,col,col_name,item.text())
+        try:
+            self.df_footprints.at[row, col_name] = item.text()
+        except:
+            print ("changeFootprintItemn ERROR invalid value",row,col,col_name,item.text())
 
     #
     #
@@ -128,9 +137,17 @@ class PNPGui():
             grid.setItem(index,3,QtWidgets.QTableWidgetItem(str(row['X']))) 
             grid.setItem(index,4,QtWidgets.QTableWidgetItem(str(row['Y']))) 
             grid.setItem(index,5,QtWidgets.QTableWidgetItem(str(row['R']))) 
+
+            # query for existing Footprint, need trim strings on import!
+            query = 'Footprint == "'+str(row['Footprint'])+'" and X > 0 '
+            if self.df_footprints.query( query )['Footprint'].count() == 0:
+                grid.item(index, 1).setBackground(Qt.yellow)
+
             grid.setCellWidget(index, 6, ButtonBlock("go",row, self.onGoButtonPartlist))
+
         grid.itemChanged.connect(self.changePartItemn)
-    
+        self.ui.lcdNumber.display(len(df.index))
+
     def changePartItemn(self,item):
         row = item.row()
         col = item.column()
@@ -140,8 +157,7 @@ class PNPGui():
             self.df_parts.at[row, col_name] = item.text()
         except:
             print ("changePartItemn ERROR invalid value",row,col,col_name,item.text())
-            self.showPartList()   
-
+            self.showPartList()   # restore list
 
     def onGoButtonPartlist(self,row):
         print("onGoButtonPartlist",row)
@@ -170,11 +186,11 @@ class PNPGui():
 
     def showPannelFiducialList(self):
         grid = self.ui.fiducial_table 
-        headers = ['PCB','Fiducial','X','Y', 'Set']
+        self.fiducials_list_headers = ['PCB','Fiducial','X','Y', 'Set']
         try: grid.itemChanged.disconnect() # avoid any msg when redraw
         except Exception: pass
         grid.setColumnCount(5)
-        grid.setHorizontalHeaderLabels(headers)
+        grid.setHorizontalHeaderLabels(self.fiducials_list_headers)
         grid.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
         # print(self.fiducials)
 
@@ -185,14 +201,19 @@ class PNPGui():
             grid.setItem(index,2,QtWidgets.QTableWidgetItem(str(row['X']))) 
             grid.setItem(index,3,QtWidgets.QTableWidgetItem(str(row['Y']))) 
             grid.setCellWidget(index, 4, ButtonBlock("Set",(index,row), self.onSetButtonFiducial))
-        grid.itemChanged.connect(self.changePartItemn)
+        grid.itemChanged.connect(self.changeFiducialItem)
         self.showPreviewPannel()
     
-    def changePartItemn(self,item):
+    def changeFiducialItem(self,item):
         row = item.row()
         col = item.column()
-        print ("changePannelItemn",row,col,item.text())
-        # TODO: write Back to dataframe ?!?!?!
+        col_name = self.part_list_headers[col]
+        # print ("changePartItemn",row,col,col_name,item.text())
+        try:
+            self.fiducials.at[row, col_name] = item.text()
+        except:
+            print ("changeFiducialItem ERROR invalid value",row,col,col_name,item.text())
+            self.showPartList()   
 
     def onSetButtonFiducial(self,callbackData):
         index = callbackData[0]

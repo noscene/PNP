@@ -433,23 +433,8 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>2</number>
     </property>
-    <widget class="QWidget" name="tabparts">
-     <attribute name="title">
-      <string>Parts</string>
-     </attribute>
-     <widget class="QTableWidget" name="parts_table">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>10</y>
-        <width>1301</width>
-        <height>731</height>
-       </rect>
-      </property>
-     </widget>
-    </widget>
     <widget class="QWidget" name="tabpannel">
      <attribute name="title">
       <string>PCBPannel</string>
@@ -617,6 +602,21 @@
         <y>140</y>
         <width>511</width>
         <height>581</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tabparts">
+     <attribute name="title">
+      <string>Parts</string>
+     </attribute>
+     <widget class="QTableWidget" name="parts_table">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>1301</width>
+        <height>731</height>
        </rect>
       </property>
      </widget>
@@ -876,8 +876,17 @@
       <height>301</height>
      </rect>
     </property>
+    <property name="smallDecimalPoint">
+     <bool>false</bool>
+    </property>
+    <property name="segmentStyle">
+     <enum>QLCDNumber::Filled</enum>
+    </property>
     <property name="value" stdset="0">
-     <double>45.000000000000000</double>
+     <double>34.000000000000000</double>
+    </property>
+    <property name="intValue" stdset="0">
+     <number>34</number>
     </property>
    </widget>
   </widget>
