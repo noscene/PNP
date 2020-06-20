@@ -11,6 +11,21 @@ import pandas as pd
 from VideoThread import *
 from PNPHelpers import *
 
+mouse_click = []
+
+# https://stackoverflow.com/questions/45575626/make-qlabel-clickable-using-pyqt5
+class QLabel_alterada(QLabel):
+    clicked=pyqtSignal()
+    def __init__(self, parent=None):
+        QLabel.__init__(self, parent)
+
+    def mousePressEvent(self, ev):
+        global mouse_click
+        mouse_click= [ev.x(),ev.y()]
+        print(ev.x(),ev.y())
+        self.clicked.emit()
+
+
 # single Object with CallBack
 class ButtonBlock(QtWidgets.QWidget):
     def __init__(self, name='tach',row=None,action=None):
@@ -56,6 +71,9 @@ class PNPGui():
         self.th.changePixmap.connect(self.th.setImageToGUI)
         self.th.start()
     
+        self.ui.videoframe.clicked.connect(self.onVideoMouseEvent) 
+
+
         self.ui.slider_h_min.valueChanged.connect(self.changeSlider_h_min)
         self.ui.slider_s_min.valueChanged.connect(self.changeSlider_s_min)
         self.ui.slider_v_min.valueChanged.connect(self.changeSlider_v_min)
@@ -78,6 +96,17 @@ class PNPGui():
     def changeSlider_s_max(self):      self.th.parms['s_max'] = self.ui.slider_s_max.value()
     def changeSlider_v_max(self):      self.th.parms['v_max'] = self.ui.slider_v_max.value()
     def changeSlider_a_fac(self):      self.th.parms['a_fac'] = self.ui.slider_a_fac.value()
+
+    def onVideoMouseEvent(self):
+        global mouse_click
+        print("onVideoMouseEvent",mouse_click)
+        # 1024x768 => 1024 = 52mm
+        mm_faktor = 52.0 / 1024.0
+        x = (512 - mouse_click[0]) * -1
+        y = 384 - mouse_click[1]
+        print("onVideoMouseEvent2",x * mm_faktor ,y * mm_faktor)
+        self.gcode.update_position_relative( x * mm_faktor , y * mm_faktor )  
+
 
 
     def onTabChange(self,i):

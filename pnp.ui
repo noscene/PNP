@@ -854,7 +854,7 @@
      </widget>
     </widget>
    </widget>
-   <widget class="QLabel" name="videoframe">
+   <widget class="QLabel_alterada" name="videoframe">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -914,6 +914,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QLabel_alterada</class>
+   <extends>QLabel</extends>
+   <header>PNPGui.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
