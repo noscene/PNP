@@ -16,6 +16,7 @@ class VideoThread(QThread):
                         'canny_thrs1' : 150,  'canny_thrs2' : 255,
                         'dilate_count' : 8,   'erode_count' : 6,
                         'gauss_v1' : 3,       'gauss_v2' : 3 }
+        self.mode = 0
 
 
     def setImageToGUI(self, image):
@@ -29,7 +30,7 @@ class VideoThread(QThread):
                 # https://stackoverflow.com/a/55468544/6622587
                 rgbImage2=self.searchForRectangles(frame)
 
-                rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                rgbImage = cv2.cvtColor(rgbImage2, cv2.COLOR_BGR2RGB)
                 h, w, ch = rgbImage.shape
                 self.draw_crosshair(rgbImage,w,h)
                 bytesPerLine = ch * w
@@ -183,9 +184,12 @@ class VideoThread(QThread):
                     #            cnt_rects2+=1
 
         
+        if self.mode==4 :
+            imgstack = self.stackImages(0.3, (  [edged,         frame0,  mask],
+                                                [imgContour,    imgHSV, imgEroded] ) )
+            return imgstack
+        else: return imgContour
 
-        imgstack = self.stackImages(0.3, (  [edged,         frame0,  mask],
-                                            [imgContour,    imgHSV, imgEroded] ) )
 
         #cv2.imshow('nanoCam',imgstack)
         
@@ -200,4 +204,4 @@ class VideoThread(QThread):
         #    plt.show()
         #    plt.imshow(imgContour)
         #    plt.show()
-        return imgstack
+        

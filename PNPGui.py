@@ -54,6 +54,8 @@ class PNPGui():
         self.gcode=gcode
         self.df_parts=None
         self.df_footprints=None
+        self.df_feeders=None
+
 
         # simple Validation on numeric fields
         self.ui.gc_mpos_x.setValidator( QDoubleValidator(0, 230.0 ,8) )
@@ -69,6 +71,7 @@ class PNPGui():
         self.th = VideoThread()
         self.th.myVideoFrame = self.ui.videoframe
         self.th.changePixmap.connect(self.th.setImageToGUI)
+        self.th.mode=0
         self.th.start()
     
         self.ui.videoframe.clicked.connect(self.onVideoMouseEvent) 
@@ -111,6 +114,8 @@ class PNPGui():
 
     def onTabChange(self,i):
         print("onTabChange TODO refresh Data on this event: ",i)
+        self.th.mode=i
+
     #
     #
     def setFootprintTable(self):
@@ -150,6 +155,45 @@ class PNPGui():
     #
     #
     #
+    def setFeederTable(self):
+          # QTableWidget
+        grid = self.ui.feeder_table
+        try: grid.itemChanged.disconnect() # avoid any msg when redraw
+        except Exception: pass
+        df = self.df_feeders
+        self.feeder_list_headers = ["Tray","NR","X","Y","W","H","Footprint","Value"]
+        grid.setColumnCount(9)
+        grid.setHorizontalHeaderLabels(self.feeder_list_headers)
+        grid.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        grid.setRowCount(len(df.index))
+        for index, row in df.iterrows():
+            grid.setItem(index,0,QtWidgets.QTableWidgetItem(str(row['Tray']))) 
+            grid.setItem(index,1,QtWidgets.QTableWidgetItem(str(row['NR']))) 
+            grid.setItem(index,2,QtWidgets.QTableWidgetItem(str(row['X']))) 
+            grid.setItem(index,3,QtWidgets.QTableWidgetItem(str(row['Y']))) 
+            grid.setItem(index,4,QtWidgets.QTableWidgetItem(str(row['W']))) 
+            grid.setItem(index,5,QtWidgets.QTableWidgetItem(str(row['H']))) 
+            grid.setItem(index,6,QtWidgets.QTableWidgetItem(str(row['Footprint']))) 
+            grid.setItem(index,7,QtWidgets.QTableWidgetItem(str(row['Value']))) 
+            grid.setCellWidget(index, 8, ButtonBlock("go",row, self.onGoButtonFeeder))
+        grid.itemChanged.connect(self.changeFeederItemn)
+
+    def changeFeederItemn(self,item):
+        row = item.row()
+        col = item.column()
+        col_name = self.feeder_list_headers[col]
+        # print ("changePartItemn",row,col,col_name,item.text())
+        try:
+            self.df_footprints.at[row, col_name] = item.text()
+        except:
+            print ("changeFootprintItemn ERROR invalid value",row,col,col_name,item.text())
+    def onGoButtonFeeder(self,item):
+        print("onGoButtonFeeder",item.X + item.W / 2.0 , item.Y + item.H / 2.0)
+        self.gcode.driveto(( item.X + item.W / 2.0  , item.Y + item.H / 2.0 )) 
+    #
+    #
+    #
+    #
     def showPartList(self):
         print("showPartList",self.df_parts)
         grid = self.ui.parts_table 
@@ -173,6 +217,10 @@ class PNPGui():
             query = 'Footprint == "'+str(row['Footprint'])+'" and X > 0 '
             if self.df_footprints.query( query )['Footprint'].count() == 0:
                 grid.item(index, 1).setBackground(Qt.yellow)
+
+            query = 'Footprint == "'+str(row['Footprint'])+'" and Value =="'+str(row['Value'])+'" '
+            if self.df_feeders.query( query )['Value'].count() == 0:
+                grid.item(index, 2).setBackground(Qt.yellow)                
 
             grid.setCellWidget(index, 6, ButtonBlock("go",row, self.onGoButtonPartlist))
 
@@ -290,14 +338,22 @@ class PNPGui():
     def showPreviewPannel(self):
        
         # config Feeder Trays
+        fachnr=0
+        fachsize = 50.0
+        tray_offset_x = 5
+        tray_offset_y = 250
         trayParts = []
-        for (i) in range(4):
-            for (j) in range(5):
-                trayParts.append(PNPFeeder('Tray',j * 15.0, i * 15.0, 15.0, 15.0))
-                
-        trayParts[18].setConfig('C0603',  '10uF' ) # foorprint,value
-        trayParts[13].setConfig('R0603',  '330K' ) # foorprint,value
-        trayParts[ 8].setConfig('C0402K', '100nF' ) # foorprint,value
+        for (i) in range(2):
+            for (j) in range(4):
+                trayParts.append(PNPFeeder('Tray',j * fachsize, i * fachsize, fachsize, fachsize))
+                print('Tray1;',fachnr,';',j * fachsize + tray_offset_x ,';',i * fachsize + tray_offset_y,';',fachsize,';',fachsize)
+                fachnr+=1
+
+
+
+        trayParts[2].setConfig('C0603',  '10uF' ) # foorprint,value
+        trayParts[3].setConfig('R0603',  '330K' ) # foorprint,value
+        trayParts[5].setConfig('C0402K', '100nF' ) # foorprint,value
         traySet = PNPFeederSet('Tray1', 120.0 , 130.0,trayParts)
 
         trayParts2 = []

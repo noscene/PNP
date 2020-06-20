@@ -43,22 +43,31 @@ class PNPGCode():
 
     def driveto(self,pos):
         #global stepSpeed,z
-        self.x = pos[0]
-        self.y = pos[1]
-        self.z=4
-        self.driveZ(self.z) # UP Nozzle!!!!! before Drive!!!!!
-        if(self.x<0): 
-            print("Bad x:",self.x)
+        new_x = pos[0]
+        new_y = pos[1]
+        
+        if(new_x<0): 
+            print("Bad x:",new_x)
             return
-        if(self.x>250):
-            print("Bad x:",self.x)
+        if(new_x>250):
+            print("Bad x:",new_x)
             return
-        if(self.y<0):
-            print("Bad y:",self.y)
+        if(new_y<0):
+            print("Bad y:",new_y)
             return
-        if(self.y>390):
-            print("Bad y:",self.y)
-            return
+        if(new_y>390):
+            print("Bad y:",new_y)
+            return        
+
+        self.x = new_x
+        self.y = new_y
+
+        if self.z > 4 :
+            self.driveZ(4) # UP Nozzle!!!!! before Drive!!!!!
+        
+        self.ui.gc_mpos_x.setText(str(round(self.x,2 )))
+        self.ui.gc_mpos_y.setText(str(round(self.y,2 )))
+
         gcode="G1 X"+ str(round(self.x,3)) + " Y"+ str(round(self.y,3)) +" F" + str(int(self.stepSpeed)) + "\r\n"
         self.sendGCode(gcode,0)
     def driveZ(self,z):
