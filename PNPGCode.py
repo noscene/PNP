@@ -4,22 +4,28 @@ import time
 import threading
 
 class PNPGCode():
-    def __init__(self, device='/dev/ttyUSB1'):
+    def __init__(self, device='/dev/ttyUSB0'):
         self.x=0
         self.y=0
         self.z=3
         self.device = device
-        self.alpha=0
+        self.alpha=0 
         self.stepSpeed=8000
         self.stepWidth=10
+        self.headoffset_x =  18.89        # machine parm
+        self.headoffset_y = -42.96        # machine parm
+        self.headoffset_active = False
+
         self.is_connected=False
         self.readthread=None
         self.get_wait=False
 
     def handle_data(self,data):
-        line = data.splitlines()[0]
-        if line == 'wait' : self.get_wait = True
-        else: print('handle_data->',line,'<--')
+        line = data.splitlines()[0] # without "\r\n"
+        if line == 'wait' and not self.get_wait:
+            self.get_wait = True
+            print("saw wait")
+        elif line != 'wait': print('handle_data->',line,'<--')
 
     def read_from_port(self,ser):
         while True:
@@ -37,6 +43,7 @@ class PNPGCode():
             self.is_connected = True
         time.sleep(0.01)
         self.ser.write(gcode.encode('raw_unicode_escape'))
+        self.get_wait=False
         #self.ser.write(b"M114\r\n")
 
             
@@ -70,8 +77,17 @@ class PNPGCode():
 
         gcode="G1 X"+ str(round(self.x,3)) + " Y"+ str(round(self.y,3)) +" F" + str(int(self.stepSpeed)) + "\r\n"
         self.sendGCode(gcode,0)
+
+    def toogle_head_cam_center(self):
+        if not self.headoffset_active:
+            self.headoffset_active = True
+            self.update_position_relative( self.headoffset_x, self.headoffset_y )
+        else:
+            self.headoffset_active = False
+            self.update_position_relative( (-1.0 * self.headoffset_x) , (-1.0 * self.headoffset_y))
+
     def driveZ(self,z):
-        time.sleep(1)
+        time.sleep(0.1)
         self.z = int(z)
         if(self.z<2):
             print("Bad z:",self.z)
@@ -136,8 +152,8 @@ class PNPGCode():
         self.rotateGrad(self.alpha+na)
     def update_position_relative(self,nx,ny):   
         self.driveto((self.x + nx ,self.y + ny))
-        self.ui.gc_mpos_x.setText(str(self.x ))
-        self.ui.gc_mpos_y.setText(str(self.y ))
+        #self.ui.gc_mpos_x.setText(str(self.x ))
+        #self.ui.gc_mpos_y.setText(str(self.y ))
 
     def update_z_position_relative(self,nz):      self.driveZ(self.z+nz)
 
@@ -164,15 +180,15 @@ class PNPGCode():
     def gc_rot45(self):   self.update_rotation_relative(45)
 
 
-    def gc_z_up(self):     self.update_z_position_relative(-3)
-    def gc_z_down(self):   self.update_z_position_relative(3)
+    def gc_z_up(self):     self.update_z_position_relative(-1)
+    def gc_z_down(self):   self.update_z_position_relative(1)
 
 
     def gc_go_absolute(self):
         print(self.ui.gc_mpos_x.text(),self.ui.gc_mpos_y.text())
         self.driveto((float(self.ui.gc_mpos_x.text()) , float(self.ui.gc_mpos_y.text())))
-        self.ui.gc_mpos_x.setText(str(self.x ))
-        self.ui.gc_mpos_y.setText(str(self.y ))        
+        #self.ui.gc_mpos_x.setText(str(self.x ))
+        #self.ui.gc_mpos_y.setText(str(self.y ))        
 
     def gc_led_head(self):
         if self.ui.gc_led_head.checkState()==0:     self.ledHead_Off()
@@ -222,6 +238,7 @@ class PNPGCode():
 
         self.ui.gc_go_absolute.clicked.connect( self.gc_go_absolute)
 
+        self.ui.gc_head_pick.clicked.connect(self.toogle_head_cam_center)
   
         self.ui.gc_led_head.clicked.connect( self.gc_led_head)
         self.ui.gc_led_bottom.clicked.connect( self.gc_led_bottom)

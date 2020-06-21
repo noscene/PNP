@@ -12,7 +12,7 @@ def main():
 
     ui = loadUi('pnp.ui')
     # connect the G-Code Driver Class 
-    gcode = PNPGCode('/dev/ttyUSB1')
+    gcode = PNPGCode('/dev/ttyUSB0')
     gcode.setupGui(ui)          # Setup Button Callback for gcode commands
     gui = PNPGui(ui,gcode)      # create UI
 

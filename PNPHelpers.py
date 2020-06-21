@@ -202,7 +202,9 @@ def convertRect(my_fd0,my_fd1,my_id0,
     angle1 = math.atan2(r1Local_p_y, r1Local_p_x) - math.atan2(r1Local_a_y, r1Local_a_x)
     #Länge von Mitte zu P berechnen
     pLength1 = math.sqrt((r1Local_p_x * r1Local_p_x) + (r1Local_p_y * r1Local_p_y))
-    print('angle1 p' , angle1 * (180.0 / math.pi) )
+    angle_grad =  angle1 * (180.0 / math.pi)
+    print('angle1 p' , angle_grad )
+
     #print('pDistance1' , pLength1 )
 
     #SCHRITT 4: Wiederhole 1 & 2 mit Ziel-Rect, ohne Punkt P
@@ -243,4 +245,4 @@ def convertRect(my_fd0,my_fd1,my_id0,
     p2_y = middle2_y + p2_y
 
     print('r2Local b' , p2_x,p2_y )    
-    return (p2_x,p2_y)
+    return (p2_x,p2_y,angle_grad)

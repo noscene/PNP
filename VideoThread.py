@@ -17,6 +17,9 @@ class VideoThread(QThread):
                         'dilate_count' : 8,   'erode_count' : 6,
                         'gauss_v1' : 3,       'gauss_v2' : 3 }
         self.mode = 0
+        self.min_obj_distance = 9999
+        self.min_obj_x = 0
+        self.min_obj_y = 0
 
 
     def setImageToGUI(self, image):
@@ -25,6 +28,8 @@ class VideoThread(QThread):
     def run(self):
         cap = cv2.VideoCapture(0)
         while True:
+            self.min_obj_distance = 9999
+
             ret, frame = cap.read()
             if ret:
                 # https://stackoverflow.com/a/55468544/6622587
@@ -32,6 +37,7 @@ class VideoThread(QThread):
 
                 rgbImage = cv2.cvtColor(rgbImage2, cv2.COLOR_BGR2RGB)
                 h, w, ch = rgbImage.shape
+
                 self.draw_crosshair(rgbImage,w,h)
                 bytesPerLine = ch * w
                 convertToQtFormat = QImage(rgbImage.data, w, h, bytesPerLine, QImage.Format_RGB888)
@@ -175,6 +181,18 @@ class VideoThread(QThread):
                     cv2.putText(imgContour, str(objNumber) + ' ' + str(round(angle,1)) + ' ' + str(cX) + ' ' + str(cY)
                                 , (x1,y1), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255,255,255), 2, cv2.LINE_AA)
                 
+                    # compute shortest Part
+                    fh, fw, fch = frame0.shape
+                    distance_x = abs(cX-fw/2.0)
+                    distance_y = abs(cY-fh/2.0)
+                    distance_to_center = cv2.sqrt(distance_x*distance_x + distance_y*distance_y)[0][0]
+                    #print(distance_x,distance_y,distance_to_center)
+
+                    if self.min_obj_distance > distance_to_center:
+                        self.min_obj_x = cX
+                        self.min_obj_y = cY
+                        self.min_obj_distance = distance_to_center
+
                     # check orientation , real size
                     #        (x,y,w,h) = cv2.boundingRect(contour)
                     #        if(w > 50 and w <500 and h < w * 0.6 and h > w * 0.4  ):
@@ -188,7 +206,8 @@ class VideoThread(QThread):
             imgstack = self.stackImages(0.3, (  [edged,         frame0,  mask],
                                                 [imgContour,    imgHSV, imgEroded] ) )
             return imgstack
-        else: return imgContour
+        else: 
+            return imgContour
 
 
         #cv2.imshow('nanoCam',imgstack)

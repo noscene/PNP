@@ -10,6 +10,7 @@ import pandas as pd
 
 from VideoThread import *
 from PNPHelpers import *
+from PNPWorker import *
 
 mouse_click = []
 
@@ -74,6 +75,12 @@ class PNPGui():
         self.th.mode=0
         self.th.start()
     
+        self.worker = PNPWorker()
+        self.worker.event.connect(self.on_worker_event)
+        self.worker.start()
+
+
+
         self.ui.videoframe.clicked.connect(self.onVideoMouseEvent) 
 
 
@@ -99,6 +106,10 @@ class PNPGui():
     def changeSlider_s_max(self):      self.th.parms['s_max'] = self.ui.slider_s_max.value()
     def changeSlider_v_max(self):      self.th.parms['v_max'] = self.ui.slider_v_max.value()
     def changeSlider_a_fac(self):      self.th.parms['a_fac'] = self.ui.slider_a_fac.value()
+
+
+    def on_worker_event(self,n):
+        print("on_worker_event",n)
 
     def onVideoMouseEvent(self):
         global mouse_click
@@ -257,11 +268,10 @@ class PNPGui():
         F1=Point(bom_fd0_x, bom_fd0_y)
         F2=Point(bom_fd1_x, bom_fd1_y)
         D=Point(  row['X'],row['Y'])
-
-
         print(F1)
         pos_to_move = convertRect(F1,F2,D,fd0_x,fd0_y,fd1_x,fd1_y) #
         print("pos_to_move",pos_to_move[0],pos_to_move[1])
+        print("angle",pos_to_move[2])
 
         self.gcode.driveto(( pos_to_move[0] , pos_to_move[1] ))                          
 
