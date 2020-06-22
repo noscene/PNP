@@ -24,6 +24,12 @@ def main():
     df_footprints = pd.read_csv('footprints.csv', sep=";", names=["Footprint","X","Y","H"] )
     gui.df_footprints = df_footprints.applymap(lambda x: x.strip() if isinstance(x, str) else x) # Trim Strings for query
 
+    # 0201 -> 501
+    # 0402 -> 502
+    # 0603 / 0805 -> 0503
+    # 1206 -> 504
+    # http://www.firepick.org/assets/pdf/juki-nozzle-catalogue-rev-c3.pdf
+ 
     gui.df_footprints['Feeder']='1'
     gui.df_footprints['Nozzle']='1'
 

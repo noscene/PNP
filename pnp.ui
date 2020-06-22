@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>2463</width>
-    <height>1200</height>
+    <height>1284</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -469,7 +469,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tabpannel">
      <attribute name="title">
@@ -485,7 +485,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>2</string>
+       <string>3</string>
       </property>
      </widget>
      <widget class="QLabel" name="label">
@@ -511,7 +511,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>1</string>
+       <string>2</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_2">
@@ -550,7 +550,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>90</string>
+       <string>60</string>
       </property>
      </widget>
      <widget class="QLineEdit" name="pcb_h">
@@ -563,7 +563,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>60</string>
+       <string>50</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_9">
@@ -933,6 +933,19 @@
     </property>
     <property name="intValue" stdset="0">
      <number>34</number>
+    </property>
+   </widget>
+   <widget class="QLabel_alterada" name="videoframe_2">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>800</y>
+      <width>1051</width>
+      <height>431</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>.......MY VIDEO</string>
     </property>
    </widget>
   </widget>

@@ -1,5 +1,7 @@
 import cv2 
 import numpy as np
+import sys
+import time
 
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
@@ -15,22 +17,33 @@ class VideoThread(QThread):
                         'a_fac' : 8,    'a_lim' : 66,
                         'canny_thrs1' : 150,  'canny_thrs2' : 255,
                         'dilate_count' : 8,   'erode_count' : 6,
-                        'gauss_v1' : 3,       'gauss_v2' : 3 }
+                        'gauss_v1' : 3,       'gauss_v2' : 3 } # TODO: add area treshold, limit
         self.mode = 0
+        self.toogle_cams = False
         self.min_obj_distance = 9999
         self.min_obj_x = 0
         self.min_obj_y = 0
+        self.w = 1024
+        self.h = 768
+        self.cam = 0
 
 
     def setImageToGUI(self, image):
         self.myVideoFrame.setPixmap(QPixmap.fromImage(image))
 
     def run(self):
-        cap = cv2.VideoCapture(0)
+
+        cap = cv2.VideoCapture(self.cam) # cv2.CAP_V4L on jetson
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH,self.w)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT,self.h)
+
+        # print("sys.platform",sys.platform)
+
+
         while True:
             self.min_obj_distance = 9999
-
             ret, frame = cap.read()
+                
             if ret:
                 # https://stackoverflow.com/a/55468544/6622587
                 rgbImage2=self.searchForRectangles(frame)
@@ -41,7 +54,7 @@ class VideoThread(QThread):
                 self.draw_crosshair(rgbImage,w,h)
                 bytesPerLine = ch * w
                 convertToQtFormat = QImage(rgbImage.data, w, h, bytesPerLine, QImage.Format_RGB888)
-                p = convertToQtFormat.scaled(1024, 768, Qt.KeepAspectRatio)
+                p = convertToQtFormat.scaled(self.w, self.h, Qt.KeepAspectRatio)
                 self.changePixmap.emit(p)
 
     def draw_crosshair(self,frame,w,h): #fadenkreuz, absehen

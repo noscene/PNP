@@ -70,11 +70,24 @@ class PNPGui():
 
         # configure Video Thread
         self.th = VideoThread()
+        if(sys.platform == 'linux'):    self.th.cam="/dev/video0"
+        else:                           self.th.cam=0
+
         self.th.myVideoFrame = self.ui.videoframe
         self.th.changePixmap.connect(self.th.setImageToGUI)
         self.th.mode=0
         self.th.start()
     
+
+        # configure Video Thread
+        self.th2 = VideoThread()
+        if(sys.platform == 'linux'):    self.th2.cam="/dev/video1"
+        else:                           self.th2.cam=1
+        self.th2.myVideoFrame = self.ui.videoframe_2
+        self.th2.changePixmap.connect(self.th2.setImageToGUI)
+        self.th2.mode=0
+        self.th2.start()
+
         self.worker = PNPWorker()
         self.worker.event.connect(self.on_worker_event)
         self.worker.start()
@@ -126,6 +139,7 @@ class PNPGui():
     def onTabChange(self,i):
         print("onTabChange TODO refresh Data on this event: ",i)
         self.th.mode=i
+        self.th.toogle_cams = not self.th.toogle_cams
 
     #
     #
@@ -384,34 +398,18 @@ class PNPGui():
         pannel_y = int(self.ui.pannel_y.text())
         pannel = PNPPcbPannel(pcb,10,36,(pannel_x,pannel_y)) # pcb Offset , layout
 
+        
+        #traySet.drawTrays(imageBlank)
+        #traySet2.drawTrays(imageBlank)
+
+        # ['PART','Footprint','Value','X', 'Y', 'R','Go']
+        footprints={}
+        for index, row in self.df_footprints.iterrows():
+            footprints[row['Footprint']] = PNPFootprint({ 'x': row['X'], 'y': row['Y'], 'h': row['H'] })
+        #print(footprints)
+
+        # create Image
         imageBlank = np.zeros((720, 800, 3), np.uint8)
-        traySet.drawTrays(imageBlank)
-        traySet2.drawTrays(imageBlank)
-
-        footprints={    "C0603K":                               PNPFootprint({'x':  1.6,  'y':  0.8,   'h': 0.5}), 
-                        "C0603":                                PNPFootprint({'x':  1.6,  'y':  0.8,   'h': 0.5}),
-                        "R0603":                                PNPFootprint({'x':  1.6,  'y':  0.8,   'h': 0.5}),
-                        "0603":                                 PNPFootprint({'x':  1.6,  'y':  0.8,   'h': 0.5}),
-                        "0603-ARC":                             PNPFootprint({'x':  1.6,  'y':  0.8,   'h': 0.5}),
-                        "C0402K":                               PNPFootprint({'x':  1.0,  'y':  0.5,   'h': 0.5}),
-                        "R0402":                                PNPFootprint({'x':  1.0,  'y':  0.5,   'h': 0.5}),
-                        "EIA7343":                              PNPFootprint({'x':  7.3,  'y':  4.3,   'h': 2.8}), # TantalCaps
-                        "PSON127P500X600X82-9N":                PNPFootprint({'x':  6.0,  'y':  5.0,   'h': 0.5}), # eSim QFN
-                        "SEEED-SWITCH_SW4-SMD-4.2X3.2X2.5MM":   PNPFootprint({'x':  4.2,  'y':  3.2,   'h': 2.5}), # Button
-                        "SOT89":                                PNPFootprint({'x':  4.6,  'y':  4.2,   'h': 1.8}), # LDO
-                        "U.FL":                                 PNPFootprint({'x':  3.0,  'y':  2.8,   'h': 1.8}), # LDO
-                        "SOT363":                               PNPFootprint({'x':  2.2,  'y':  2.2,   'h': 1.0}), # 0.5 innendurchmesser
-                        "Qwiic":                                PNPFootprint({'x':  3.0,  'y':  5.0,   'h': 2.8}), # 0.5 innendurchmesser
-                        "SIM800C":                              PNPFootprint({'x': 15.7,  'y': 17.6,   'h': 2.8}), # 0.5 innendurchmesser
-                        "QFN50P700X700X100-49N":                PNPFootprint({'x': 10.0,  'y': 10.0,   'h': 2.8}), # 0.5 innendurchmesser
-                        "QFN50P900X900X100-65N":                PNPFootprint({'x': 12.0,  'y': 12.0,   'h': 2.8}), # 0.5 innendurchmesser
-                        "LQFP64L":                              PNPFootprint({'x': 12.0,  'y': 12.0,   'h': 2.8}), # 0.5 innendurchmesser
-                        "WE-CON_SDMO-CN-9":                     PNPFootprint({'x': 12.0,  'y': 12.0,   'h': 2.8}), # 0.5 innendurchmesser
-                        "ESP-WROOM32":                          PNPFootprint({'x': 18.0,  'y': 20.0,   'h': 3.1}) } 
-        # Print CSV Data
-        for fp in footprints:   print(fp,';',footprints[fp].parms['x'] ,';',footprints[fp].parms['y'] ,';',footprints[fp].parms['h']         )
-
-
         pannel.drawPcbs(imageBlank,footprints)
         h, w, ch = imageBlank.shape
         bytesPerLine = ch * w

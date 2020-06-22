@@ -12,6 +12,9 @@ class PNPGCode():
         self.alpha=0 
         self.stepSpeed=8000
         self.stepWidth=10
+        self.bottom_cam_x =   5.39        # machine parm
+        self.bottom_cam_y =  34.73        # machine parm
+
         self.headoffset_x =  18.89        # machine parm
         self.headoffset_y = -42.96        # machine parm
         self.headoffset_active = False
