@@ -89,20 +89,21 @@ class PNPGui():
         self.th2.start()
 
         self.worker = PNPWorker()
+        self.worker.gcode = self.gcode
         self.worker.event.connect(self.on_worker_event)
-        self.worker.start()
+
 
 
 
         self.ui.videoframe.clicked.connect(self.onVideoMouseEvent) 
 
 
-        self.ui.slider_h_min.valueChanged.connect(self.changeSlider_h_min)
-        self.ui.slider_s_min.valueChanged.connect(self.changeSlider_s_min)
-        self.ui.slider_v_min.valueChanged.connect(self.changeSlider_v_min)
-        self.ui.slider_h_max.valueChanged.connect(self.changeSlider_h_max)
-        self.ui.slider_s_max.valueChanged.connect(self.changeSlider_s_max)
-        self.ui.slider_v_max.valueChanged.connect(self.changeSlider_v_max)
+        self.ui.slider_h_min.valueChanged.connect(self.changeSlider4Vision)
+        self.ui.slider_s_min.valueChanged.connect(self.changeSlider4Vision)
+        self.ui.slider_v_min.valueChanged.connect(self.changeSlider4Vision)
+        self.ui.slider_h_max.valueChanged.connect(self.changeSlider4Vision)
+        self.ui.slider_s_max.valueChanged.connect(self.changeSlider4Vision)
+        self.ui.slider_v_max.valueChanged.connect(self.changeSlider4Vision)
 
         self.visionParms={      'h_min' : 0,    's_min' : 0 ,   'v_min'  : 102 ,
                                 'h_max' : 179,  's_max' : 255,  'v_max'  : 255 ,
@@ -112,17 +113,22 @@ class PNPGui():
                                 'gauss_v1' : 3,       'gauss_v2' : 3 }
     #
     # Helper Functions for Sliders
-    def changeSlider_h_min(self):      self.th.parms['h_min'] = self.ui.slider_h_min.value()
-    def changeSlider_s_min(self):      self.th.parms['s_min'] = self.ui.slider_s_min.value()
-    def changeSlider_v_min(self):      self.th.parms['v_min'] = self.ui.slider_v_min.value()
-    def changeSlider_h_max(self):      self.th.parms['h_max'] = self.ui.slider_h_max.value()
-    def changeSlider_s_max(self):      self.th.parms['s_max'] = self.ui.slider_s_max.value()
-    def changeSlider_v_max(self):      self.th.parms['v_max'] = self.ui.slider_v_max.value()
-    def changeSlider_a_fac(self):      self.th.parms['a_fac'] = self.ui.slider_a_fac.value()
+    def changeSlider4Vision(self):
+        self.th.parms['h_min'] = self.ui.slider_h_min.value()
+        self.th.parms['s_min'] = self.ui.slider_s_min.value()
+        self.th.parms['v_min'] = self.ui.slider_v_min.value()
+        self.th.parms['v_min'] = self.ui.slider_v_min.value()
+        self.th.parms['h_max'] = self.ui.slider_h_max.value()
+        self.th.parms['s_max'] = self.ui.slider_s_max.value()
+        self.th.parms['v_max'] = self.ui.slider_v_max.value()
+        #self.th.parms['a_fac'] = self.ui.slider_a_fac.value()
+        self.th2.parms = self.th.parms # For first Tests just use same Settings on both cams
+   
 
 
     def on_worker_event(self,n):
         print("on_worker_event",n)
+
 
     def onVideoMouseEvent(self):
         global mouse_click
@@ -139,8 +145,10 @@ class PNPGui():
     def onTabChange(self,i):
         print("onTabChange TODO refresh Data on this event: ",i)
         self.th.mode=i
-        self.th.toogle_cams = not self.th.toogle_cams
+        self.th2.mode=i
 
+
+    #
     #
     #
     def setFootprintTable(self):
@@ -226,7 +234,7 @@ class PNPGui():
         except Exception: pass
         df = self.df_parts
         self.part_list_headers = ['PART','Footprint','Value','X', 'Y', 'R','Go']
-        grid.setColumnCount(7)
+        grid.setColumnCount(8)
         grid.setHorizontalHeaderLabels(self.part_list_headers)
         grid.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
         grid.setRowCount(len(df.index))
@@ -248,6 +256,7 @@ class PNPGui():
                 grid.item(index, 2).setBackground(Qt.yellow)                
 
             grid.setCellWidget(index, 6, ButtonBlock("go",row, self.onGoButtonPartlist))
+            grid.setCellWidget(index, 7, ButtonBlock("Sim",row, self.onSimButtonPartlist))
 
         grid.itemChanged.connect(self.changePartItemn)
         self.ui.lcdNumber.display(len(df.index))
@@ -262,6 +271,12 @@ class PNPGui():
         except:
             print ("changePartItemn ERROR invalid value",row,col,col_name,item.text())
             self.showPartList()   # restore list
+
+    def onSimButtonPartlist(self,row):
+        print("onSimButtonPartlist", row)
+        self.worker.state_idx=0
+        self.worker.start()
+
 
     def onGoButtonPartlist(self,row):
         print("onGoButtonPartlist",row['X'],row['Y'])

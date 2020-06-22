@@ -469,7 +469,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>4</number>
     </property>
     <widget class="QWidget" name="tabpannel">
      <attribute name="title">
@@ -778,6 +778,12 @@
         <width>521</width>
         <height>22</height>
        </rect>
+      </property>
+      <property name="statusTip">
+       <string extracomment="fsdsdf"/>
+      </property>
+      <property name="accessibleDescription">
+       <string extracomment="v_min"/>
       </property>
       <property name="maximum">
        <number>255</number>

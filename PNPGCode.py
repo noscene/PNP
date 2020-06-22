@@ -1,6 +1,7 @@
 # pip3 install PySerial 
 import serial
 import time
+import sys
 import threading
 
 class PNPGCode():
@@ -39,6 +40,7 @@ class PNPGCode():
 
     def sendGCode(self,gcode,dly=0):
         print(gcode)
+        if(sys.platform == 'darwin'): return    # avoid crashes on my mac
         if not self.is_connected:
             self.ser = serial.Serial(self.device, 115200)
             self.readthread = threading.Thread(target=self.read_from_port, args=(self.ser,))

@@ -19,7 +19,6 @@ class VideoThread(QThread):
                         'dilate_count' : 8,   'erode_count' : 6,
                         'gauss_v1' : 3,       'gauss_v2' : 3 } # TODO: add area treshold, limit
         self.mode = 0
-        self.toogle_cams = False
         self.min_obj_distance = 9999
         self.min_obj_x = 0
         self.min_obj_y = 0
