@@ -17,7 +17,8 @@ class VideoThread(QThread):
                         'a_fac' : 8,    'a_lim' : 66,
                         'canny_thrs1' : 150,  'canny_thrs2' : 255,
                         'dilate_count' : 8,   'erode_count' : 6,
-                        'gauss_v1' : 3,       'gauss_v2' : 3 } # TODO: add area treshold, limit
+                        'gauss_v1' : 3,       'gauss_v2' : 3 ,
+                        'expose' : 1000 } # TODO: add area treshold, limit
         self.mode = 0
         self.min_obj_distance = 9999
         self.min_obj_x = 0
@@ -36,10 +37,22 @@ class VideoThread(QThread):
         cap.set(cv2.CAP_PROP_FRAME_WIDTH,self.w)
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT,self.h)
 
+        cap.set(cv2.CAP_PROP_AUTO_EXPOSURE,1)   # disable auto belichtung
+
+
+        # disable auto exposure
+        # sven@sven-desktop:~$ v4l2-ctl -d /dev/video1  --set-ctrl exposure_auto=1
+        # sven@sven-desktop:~$ v4l2-ctl -d /dev/video0  --set-ctrl exposure_auto=1
+
+        # now can Set manual
+        # v4l2-ctl -d /dev/video0  --set-ctrl exposure_absolute=1000 
+
         # print("sys.platform",sys.platform)
 
 
         while True:
+            cap.set(cv2.CAP_PROP_EXPOSURE,self.parms["expose"])
+
             self.min_obj_distance = 9999
             ret, frame = cap.read()
                 

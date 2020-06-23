@@ -92,7 +92,7 @@ class PNPGui():
         self.worker.gcode = self.gcode
         self.worker.event.connect(self.on_worker_event)
 
-
+        self.ui.check_step.clicked.connect(self.onCheckStep)
 
 
         self.ui.videoframe.clicked.connect(self.onVideoMouseEvent) 
@@ -104,13 +104,32 @@ class PNPGui():
         self.ui.slider_h_max.valueChanged.connect(self.changeSlider4Vision)
         self.ui.slider_s_max.valueChanged.connect(self.changeSlider4Vision)
         self.ui.slider_v_max.valueChanged.connect(self.changeSlider4Vision)
+        self.ui.slider_expose.valueChanged.connect(self.changeSlider4Vision)
+        
+    
+    
+    #
+    # Handling worker Jobs allow Steps if need interacting
+    #
+    def on_worker_event(self,n):
+        print("on_worker_event",n)          
+        workerItem = self.worker.states[n]  # get current Worker Item
+        if workerItem['auto']:
+            self.ui.check_step.setCheckState(2)
+            self.worker.next_step_enable=True
+        else:
+            self.ui.check_step.setCheckState(False)
 
-        self.visionParms={      'h_min' : 0,    's_min' : 0 ,   'v_min'  : 102 ,
-                                'h_max' : 179,  's_max' : 255,  'v_max'  : 255 ,
-                                'a_fac' : 8,    'a_lim' : 66,
-                                'canny_thrs1' : 150,  'canny_thrs2' : 255,
-                                'dilate_count' : 8,   'erode_count' : 6,
-                                'gauss_v1' : 3,       'gauss_v2' : 3 }
+    def onCheckStep(self):
+        if(self.ui.check_step.checkState()):
+            self.worker.next_step_enable=True
+            print("checked")
+        else:
+            print("non checked")    
+    
+    
+    
+    
     #
     # Helper Functions for Sliders
     def changeSlider4Vision(self):
@@ -121,13 +140,12 @@ class PNPGui():
         self.th.parms['h_max'] = self.ui.slider_h_max.value()
         self.th.parms['s_max'] = self.ui.slider_s_max.value()
         self.th.parms['v_max'] = self.ui.slider_v_max.value()
+        self.th.parms['expose'] = self.ui.slider_expose.value()
         #self.th.parms['a_fac'] = self.ui.slider_a_fac.value()
         self.th2.parms = self.th.parms # For first Tests just use same Settings on both cams
-   
+        print("changeSlider4Vision", self.th.parms)
 
 
-    def on_worker_event(self,n):
-        print("on_worker_event",n)
 
 
     def onVideoMouseEvent(self):
@@ -146,7 +164,7 @@ class PNPGui():
         print("onTabChange TODO refresh Data on this event: ",i)
         self.th.mode=i
         self.th2.mode=i
-
+        if(i==3): self.setFeederTable()
 
     #
     #
@@ -194,21 +212,22 @@ class PNPGui():
         try: grid.itemChanged.disconnect() # avoid any msg when redraw
         except Exception: pass
         df = self.df_feeders
-        self.feeder_list_headers = ["Tray","NR","X","Y","W","H","Footprint","Value"]
-        grid.setColumnCount(9)
+        self.feeder_list_headers = ["Tray","Vision","NR","X","Y","W","H","Footprint","Value"]
+        grid.setColumnCount(10)
         grid.setHorizontalHeaderLabels(self.feeder_list_headers)
         grid.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
         grid.setRowCount(len(df.index))
         for index, row in df.iterrows():
             grid.setItem(index,0,QtWidgets.QTableWidgetItem(str(row['Tray']))) 
-            grid.setItem(index,1,QtWidgets.QTableWidgetItem(str(row['NR']))) 
-            grid.setItem(index,2,QtWidgets.QTableWidgetItem(str(row['X']))) 
-            grid.setItem(index,3,QtWidgets.QTableWidgetItem(str(row['Y']))) 
-            grid.setItem(index,4,QtWidgets.QTableWidgetItem(str(row['W']))) 
-            grid.setItem(index,5,QtWidgets.QTableWidgetItem(str(row['H']))) 
-            grid.setItem(index,6,QtWidgets.QTableWidgetItem(str(row['Footprint']))) 
-            grid.setItem(index,7,QtWidgets.QTableWidgetItem(str(row['Value']))) 
-            grid.setCellWidget(index, 8, ButtonBlock("go",row, self.onGoButtonFeeder))
+            grid.setItem(index,1,QtWidgets.QTableWidgetItem(str(row['Vision']))) 
+            grid.setItem(index,2,QtWidgets.QTableWidgetItem(str(row['NR']))) 
+            grid.setItem(index,3,QtWidgets.QTableWidgetItem(str(row['X']))) 
+            grid.setItem(index,4,QtWidgets.QTableWidgetItem(str(row['Y']))) 
+            grid.setItem(index,5,QtWidgets.QTableWidgetItem(str(row['W']))) 
+            grid.setItem(index,6,QtWidgets.QTableWidgetItem(str(row['H']))) 
+            grid.setItem(index,7,QtWidgets.QTableWidgetItem(str(row['Footprint']))) 
+            grid.setItem(index,8,QtWidgets.QTableWidgetItem(str(row['Value']))) 
+            grid.setCellWidget(index, 9, ButtonBlock("go",row, self.onGoButtonFeeder))
         grid.itemChanged.connect(self.changeFeederItemn)
 
     def changeFeederItemn(self,item):
@@ -217,9 +236,11 @@ class PNPGui():
         col_name = self.feeder_list_headers[col]
         # print ("changePartItemn",row,col,col_name,item.text())
         try:
-            self.df_footprints.at[row, col_name] = item.text()
+            self.df_feeders.at[row, col_name] = item.text()
         except:
             print ("changeFootprintItemn ERROR invalid value",row,col,col_name,item.text())
+        self.df_feeders.to_csv('feeder2.csv', sep=";", header=False,index=False, columns=["Tray","NR","X","Y","W","H","Footprint","Value","Vision"])
+
     def onGoButtonFeeder(self,item):
         print("onGoButtonFeeder",item.X + item.W / 2.0 , item.Y + item.H / 2.0)
         self.gcode.driveto(( item.X + item.W / 2.0  , item.Y + item.H / 2.0 )) 
@@ -274,11 +295,16 @@ class PNPGui():
 
     def onSimButtonPartlist(self,row):
         print("onSimButtonPartlist", row)
+        self.worker.footprint = self.df_footprints.query( 'Footprint == "'+str(row['Footprint'])+'" and X > 0 ' ).iloc[0]
+        self.worker.feeder    = self.df_feeders.query( 'Footprint == "'+str(row['Footprint'])+'" and Value =="'+str(row['Value'])+'" ').iloc[0]
+        print("onSimButtonPartlist::Footprint",self.worker.footprint)
+        print("onSimButtonPartlist::feeder",self.worker.feeder)
+        self.worker.position_part_on_pcb = self.getMotorPositionForPart(row)
         self.worker.state_idx=0
         self.worker.start()
 
 
-    def onGoButtonPartlist(self,row):
+    def getMotorPositionForPart(self,row):      # TODO: extend for other PCBs on Pannel
         print("onGoButtonPartlist",row['X'],row['Y'])
         # Query nativ positions
         fd0_x = float(self.fiducials.query('Fiducial == "FD0" and PCB == 0 ').iloc[0]['X'])
@@ -287,6 +313,7 @@ class PNPGui():
         fd1_y = float(self.fiducials.query('Fiducial == "FD1" and PCB == 0 ').iloc[0]['Y'])
         if ( fd0_x==0 or fd0_y==0 or fd1_x==0 or fd1_y==0 ):
             print("LERN first fiducials",fd0_x,fd0_y,fd1_x,fd1_y)
+            return
         
         bom_fd0_x = self.df_parts.query('PART == "FD1" ').iloc[0]['X']
         bom_fd0_y = self.df_parts.query('PART == "FD1" ').iloc[0]['Y']
@@ -298,10 +325,15 @@ class PNPGui():
         F2=Point(bom_fd1_x, bom_fd1_y)
         D=Point(  row['X'],row['Y'])
         print(F1)
-        pos_to_move = convertRect(F1,F2,D,fd0_x,fd0_y,fd1_x,fd1_y) #
+        rect = convertRect(F1,F2,D,fd0_x,fd0_y,fd1_x,fd1_y) #
+        return rect
+
+
+
+    def onGoButtonPartlist(self,row):
+        pos_to_move = self.getMotorPositionForPart(row)
         print("pos_to_move",pos_to_move[0],pos_to_move[1])
         print("angle",pos_to_move[2])
-
         self.gcode.driveto(( pos_to_move[0] , pos_to_move[1] ))                          
 
     #
@@ -315,8 +347,8 @@ class PNPGui():
         pcb=0
         for p in range(pannel_x * pannel_y):
             # TODO: dont overwrite existing Fiducial Cords!
-            d.append((pcb ,'FD0', 68.39 , 51.6))
-            d.append((pcb ,'FD1', 31.50,  83.4))
+            d.append((pcb ,'FD0', 68.44 , 53.99))
+            d.append((pcb ,'FD1', 31.75,  86.09))
             pcb+=1
         # print(d)
         self.fiducials  = pd.DataFrame(d, columns=('PCB','Fiducial','X','Y'))

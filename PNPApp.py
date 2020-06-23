@@ -17,7 +17,7 @@ def main():
     gui = PNPGui(ui,gcode)      # create UI
 
 
-    df_feeders = pd.read_csv('feeder.csv', sep=";", names=["Tray","NR","X","Y","W","H","Footprint","Value"] )
+    df_feeders = pd.read_csv('feeder.csv', sep=";", names=["Tray","NR","X","Y","W","H","Footprint","Value","Vision"] )
     gui.df_feeders = df_feeders.applymap(lambda x: x.strip() if isinstance(x, str) else x) # Trim Strings for query
 
 

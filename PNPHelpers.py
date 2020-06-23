@@ -17,7 +17,7 @@ class Point():
     def __init__(self,x,y):
         self.x = float(x)
         self.y = float(y)
-        print("Point",x,y)
+        #print("Point",x,y)
 
 class PNPImageBase(): # just a helper to draw smd parts, panels etc on opencv window
     def drawRect(self,img,x,y,w,h,color,width):
