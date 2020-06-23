@@ -18,7 +18,7 @@ class VideoThread(QThread):
                         'canny_thrs1' : 150,  'canny_thrs2' : 255,
                         'dilate_count' : 8,   'erode_count' : 6,
                         'gauss_v1' : 3,       'gauss_v2' : 3 ,
-                        'expose' : 1000 } # TODO: add area treshold, limit
+                        'expose' : 65 } # TODO: add area treshold, limit
         self.mode = 0
         self.min_obj_distance = 9999
         self.min_obj_x = 0

@@ -15,12 +15,11 @@ class PNPWorker(QThread):
         super(QThread, self).__init__()
 
         self.states = [ {'name': self.GO_PCBPART,        'wait': 1.0, 'auto': True},
-                        {'name': self.MAKE_PCB_FOTO,     'wait': 1.0, 'auto': False},
-                        {'name': self.GO_FEEDER,         'wait': 1.0, 'auto': True},
+                        {'name': self.MAKE_PCB_FOTO,     'wait': 1.0, 'auto': True},
+                        {'name': self.GO_FEEDER,         'wait': 1.0, 'auto': False},
                         {'name': self.CENTER_TO_CLOSE,   'wait': 1.0, 'auto': False},
-                        {'name': self.GO_NOZZLE_OFFSET,  'wait': 1.0, 'auto': True},
-                        {'name': self.CENTER_TO_CLOSE,   'wait': 1.0, 'auto': True},
-                        {'name': self.NOZZLE_DOWN,       'wait': 1.0, 'auto': True},
+                        {'name': self.GO_NOZZLE_OFFSET,  'wait': 1.0, 'auto': False},
+                        {'name': self.NOZZLE_DOWN,       'wait': 1.0, 'auto': False},
                         {'name': self.SELENOID_ON,       'wait': 1.0, 'auto': True},
                         {'name': self.NOZZLE_UP,         'wait': 1.0, 'auto': True},
                         {'name': self.GO_BOTTOMCAM,      'wait': 1.0, 'auto': True},
@@ -45,12 +44,11 @@ class PNPWorker(QThread):
         while True:
             current_state = self.states[self.state_idx]     # loopup state
             self.event.emit(self.state_idx)                 # call UI
-            time_to_wait = current_state['wait']
-            time.sleep(time_to_wait)                        # wait
-
             while not self.next_step_enable:                # Wait for enable Step
                 pass
 
+            time_to_wait = current_state['wait']
+            time.sleep(time_to_wait)                        # wait
             print(self.state_idx,"UI Finished")
             current_state['name']()                         # call function
             if( self.state_idx < len(self.states)-1 ):
@@ -61,6 +59,7 @@ class PNPWorker(QThread):
 
     def GO_PCBPART(self):           
         print(self.state_idx,"GO_PCBPART")
+        self.gcode.ledHead_On()
         self.gcode.driveto((self.position_part_on_pcb[0], self.position_part_on_pcb[1]))
     def MAKE_PCB_FOTO(self):        print(self.state_idx,"MAKE_PCB_FOTO")
     def GO_FEEDER(self):            
@@ -68,7 +67,12 @@ class PNPWorker(QThread):
         self.gcode.driveto((self.feeder.X + self.feeder.W/2 ,self.feeder.Y + self.feeder.H/2))
     def CENTER_TO_CLOSE(self):      
         print(self.state_idx,"CENTER_TO_CLOSE")
+        self.gcode.vacuum1_On()
+        self.gcode.vacuum2_On()
     def GO_NOZZLE_OFFSET(self):     
+        self.gcode.driveto((self.gcode.x + self.gcode.headoffset_x ,
+                            self.gcode.y + self.gcode.headoffset_y   ))
+
         print(self.state_idx,"GO_NOZZLE_OFFSET")
     def NOZZLE_DOWN(self):          
         print(self.state_idx,"NOZZLE_DOWN")    
@@ -87,7 +91,11 @@ class PNPWorker(QThread):
         #self.gcode.driveto((100,100))
     def GO_PCB_PLACE(self):         
         print(self.state_idx,"GO_PCB_PLACE")   
-        self.gcode.driveto((self.position_part_on_pcb[0], self.position_part_on_pcb[1])) 
+        #
+        # TODO: add the currentOffset from self.gcode.x - self.gcode.bottom_cam_x
+        #
+        self.gcode.driveto((self.position_part_on_pcb[0]  + self.gcode.headoffset_x  , 
+                            self.position_part_on_pcb[1]  + self.gcode.headoffset_y )) 
     def NOZZLE_DOWN2(self):         
         print(self.state_idx,"NOZZLE_DOWN2")    
     def SELENOID_OFF(self):         

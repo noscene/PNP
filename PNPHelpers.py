@@ -20,13 +20,16 @@ class Point():
         #print("Point",x,y)
 
 class PNPImageBase(): # just a helper to draw smd parts, panels etc on opencv window
+    #scale = 3.0
+    # base = 720
+    def __init__(self):
+        pass
+
     def drawRect(self,img,x,y,w,h,color,width):
-        global scale,base
-        p1 = (int(x * scale),int(base - y * scale ))
-        p2 = (int((x+w) * scale),int(base-((y+h) * scale )))
+        p1 = (int(x * self.scale),int(self.base - y * self.scale ))
+        p2 = (int((x+w) * self.scale),int(self.base-((y+h) * self.scale )))
         cv2.rectangle(img,p1 ,p2 , color, width)
     def drawCenterRect(self,img,xi,yi,wi,hi,rotation,color,width):
-        global scale,base
         w_temp = wi
         h_temp = hi
         w=w_temp
@@ -36,12 +39,11 @@ class PNPImageBase(): # just a helper to draw smd parts, panels etc on opencv wi
             w=h_temp
         x = xi-w/2
         y = yi-h/2  
-        p1 = (int(x * scale),int(base - y * scale ))
-        p2 = (int((x+w) * scale),int(base-((y+h) * scale )))
+        p1 = (int(x * self.scale),int(self.base - y * self.scale ))
+        p2 = (int((x+w) * self.scale),int(self.base-((y+h) * self.scale )))
         cv2.rectangle(img,p1 ,p2 , color, width)
     def drawText(self,img,x,y,text,color, size):
-        global scale,base
-        p1 = ( int(x * scale), int(base - y * scale) )
+        p1 = ( int(x * self.scale), int(self.base - y * self.scale) )
         cv2.putText(img, text, p1 , cv2.FONT_HERSHEY_SIMPLEX, size, color, 1, cv2.LINE_AA)
         
 class PNPVision():
@@ -88,6 +90,8 @@ class PNPSinglePcb():
 class PNPPcbPannel(PNPImageBase):
     def __init__(self,pcb,x,y,layout):
         #self.pcb = pcb # TODO: make this as array
+        self.scale = 3.0
+        self.base = 720
         self.x = x              # orgin fix
         self.y = y              # orgin fix
         self.layout = layout    # (x_xount, y_count)
@@ -99,7 +103,6 @@ class PNPPcbPannel(PNPImageBase):
                 self.pcbs[ty][tx].number=cnt
                 cnt+=1 # eindeutig numerieren
     def drawPcbs(self,img,footprints):
-        global scale
         for ty in range(self.layout[1]):
             for tx in range(self.layout[0]):
                 pcb = self.pcbs[ty][tx]
@@ -119,7 +122,7 @@ class PNPPcbPannel(PNPImageBase):
                         fp = footprints[p.foodprint].parms
                         # print(fp)
                         self.drawCenterRect(img,px,py,fp['x'],fp['y'],p.r,(128,128,128), 1)
-                        self.drawText(img,px,py,p.name,(0,255,255), scale * 0.05)
+                        self.drawText(img,px,py,p.name,(0,255,255), self.scale * 0.05)
                     else:
                         self.drawCenterRect(img,px,py,2,2,p.r,(255,0,0), 3) # draw missing footprint
                     
@@ -144,15 +147,14 @@ class PNPFeederSet(PNPImageBase):
         self.y         = y
         self.feeders   = feeders
     def drawTrays(self,img):
-        global scale
         cnt=0
         for t in self.feeders:
             xpos = self.x + t.x
             ypos = self.y + t.y
             self.drawRect(img,xpos,ypos,t.w,t.h,(0,255,0), 2)
-            self.drawText(img,xpos+2,ypos+2,str(cnt),(0,255,0), scale * 0.1)
+            self.drawText(img,xpos+2,ypos+2,str(cnt),(0,255,0), self.scale * 0.1)
             if(t.value): 
-                self.drawText(img,xpos+2,ypos+5, t.value,(255,255,255), scale * 0.1)
+                self.drawText(img,xpos+2,ypos+5, t.value,(255,255,255), self.scale * 0.1)
             cnt+=1
                 
 # PNPPcbPannel -> PNPSinglePcb -> PNPPart(s) -> PNPFootprint

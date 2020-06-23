@@ -443,8 +443,9 @@ class PNPGui():
 
         pannel_x = int(self.ui.pannel_x.text())
         pannel_y = int(self.ui.pannel_y.text())
-        pannel = PNPPcbPannel(pcb,10,36,(pannel_x,pannel_y)) # pcb Offset , layout
+        pannel = PNPPcbPannel(pcb,5,20,(pannel_x,pannel_y)) # pcb Offset , layout
 
+        pannel.scale=5.0
         
         #traySet.drawTrays(imageBlank)
         #traySet2.drawTrays(imageBlank)

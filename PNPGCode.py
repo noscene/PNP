@@ -16,8 +16,8 @@ class PNPGCode():
         self.bottom_cam_x =   5.39        # machine parm
         self.bottom_cam_y =  34.73        # machine parm
 
-        self.headoffset_x =  18.89        # machine parm
-        self.headoffset_y = -42.96        # machine parm
+        self.headoffset_x =  18.69        # machine parm
+        self.headoffset_y = -46.97        # machine parm
         self.headoffset_active = False
 
         self.is_connected=False
@@ -163,11 +163,11 @@ class PNPGCode():
     def update_z_position_relative(self,nz):      self.driveZ(self.z+nz)
 
     # Setup UI Stuff    
-    def gc_up1(self):       self.update_position_relative(0,0.3)
+    def gc_up1(self):       self.update_position_relative(0,0.1)
     def gc_up10(self):      self.update_position_relative(0, 6)
     def gc_up100(self):     self.update_position_relative(0,60)
 
-    def gc_down1(self):     self.update_position_relative(0,-0.3)
+    def gc_down1(self):     self.update_position_relative(0,-0.1)
     def gc_down10(self):    self.update_position_relative(0,-6)
     def gc_down100(self):   self.update_position_relative(0,-60)
 
@@ -179,8 +179,8 @@ class PNPGCode():
     def gc_right10(self):   self.update_position_relative(6,0)
     def gc_right100(self):  self.update_position_relative(60,0)
 
-    def gc_rot1(self):    self.update_rotation_relative(1)
-    def gc_rot_1(self):   self.update_rotation_relative(-1)
+    def gc_rot1(self):    self.update_rotation_relative(3)
+    def gc_rot_1(self):   self.update_rotation_relative(-2)
     def gc_rot_90(self):  self.update_rotation_relative(-90)
     def gc_rot45(self):   self.update_rotation_relative(45)
 

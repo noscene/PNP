@@ -933,10 +933,13 @@
        <string extracomment="v_min"/>
       </property>
       <property name="maximum">
-       <number>3000</number>
+       <number>500</number>
       </property>
       <property name="value">
-       <number>102</number>
+       <number>65</number>
+      </property>
+      <property name="sliderPosition">
+       <number>65</number>
       </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
