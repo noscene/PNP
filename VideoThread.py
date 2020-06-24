@@ -12,13 +12,7 @@ class VideoThread(QThread):
 
     def __init__(self):
         super(QThread, self).__init__()
-        self.parms={    'h_min' : 0,    's_min' : 0 ,   'v_min'  : 102 ,
-                        'h_max' : 179,  's_max' : 255,  'v_max'  : 255 ,
-                        'a_fac' : 8,    'a_lim' : 66,
-                        'canny_thrs1' : 150,  'canny_thrs2' : 255,
-                        'dilate_count' : 8,   'erode_count' : 6,
-                        'gauss_v1' : 3,       'gauss_v2' : 3 ,
-                        'expose' : 300 } # TODO: add area treshold, limit
+        self.parms={    } # TODO: add area treshold, limit
         self.mode = 0
         self.min_obj_distance = 9999
         self.min_obj_x = 0
@@ -144,7 +138,8 @@ class VideoThread(QThread):
 
         parms=self.parms
 
-        kernel = np.ones((5,5),np.uint8)
+        ks = parms['kernel'] 
+        kernel = np.ones((ks,ks),np.uint8)
 
         imgHSV      = cv2.cvtColor(frame0,cv2.COLOR_BGR2HSV)
         imgHSV2     = cv2.GaussianBlur(imgHSV,(parms['gauss_v1'],parms['gauss_v2']),cv2.BORDER_DEFAULT)
@@ -173,7 +168,7 @@ class VideoThread(QThread):
         for contour in contours:
             # https://stackoverflow.com/questions/34237253/detect-centre-and-angle-of-rectangles-in-an-image-using-opencv/34285205
             myarea = cv2.contourArea(contour)
-            if myarea > (parms['a_lim'] * 24) :
+            if myarea > (parms['a_min'] * parms['a_min']) and myarea < (parms['a_max'] * parms['a_max']) :
                 cv2.drawContours(imgContour, contour, -1, (0, 0, 200), 3)
                 peri = cv2.arcLength(contour,True)
                 approx = cv2.approxPolyDP(contour, apdb * peri,True)

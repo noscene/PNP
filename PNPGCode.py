@@ -13,8 +13,8 @@ class PNPGCode():
         self.alpha=0 
         self.stepSpeed=8000
         self.stepWidth=10
-        self.bottom_cam_x =   5.39        # machine parm
-        self.bottom_cam_y =  34.73        # machine parm
+        self.bottom_cam_x =   5.29        # machine parm
+        self.bottom_cam_y =  33.96        # machine parm -> Drive Down with Nozzle before measure!
 
         self.headoffset_x =  18.64        # machine parm
         self.headoffset_y = -46.87        # machine parm

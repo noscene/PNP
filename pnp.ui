@@ -482,7 +482,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>4</number>
     </property>
     <widget class="QWidget" name="tabpannel">
      <attribute name="title">
@@ -723,7 +723,7 @@
       <property name="geometry">
        <rect>
         <x>100</x>
-        <y>430</y>
+        <y>350</y>
         <width>521</width>
         <height>22</height>
        </rect>
@@ -742,7 +742,7 @@
       <property name="geometry">
        <rect>
         <x>90</x>
-        <y>400</y>
+        <y>320</y>
         <width>60</width>
         <height>16</height>
        </rect>
@@ -755,7 +755,7 @@
       <property name="geometry">
        <rect>
         <x>100</x>
-        <y>490</y>
+        <y>410</y>
         <width>521</width>
         <height>22</height>
        </rect>
@@ -774,7 +774,7 @@
       <property name="geometry">
        <rect>
         <x>90</x>
-        <y>460</y>
+        <y>380</y>
         <width>60</width>
         <height>16</height>
        </rect>
@@ -787,7 +787,7 @@
       <property name="geometry">
        <rect>
         <x>100</x>
-        <y>550</y>
+        <y>470</y>
         <width>521</width>
         <height>22</height>
        </rect>
@@ -812,7 +812,7 @@
       <property name="geometry">
        <rect>
         <x>90</x>
-        <y>520</y>
+        <y>440</y>
         <width>60</width>
         <height>16</height>
        </rect>
@@ -825,7 +825,7 @@
       <property name="geometry">
        <rect>
         <x>740</x>
-        <y>490</y>
+        <y>410</y>
         <width>521</width>
         <height>22</height>
        </rect>
@@ -844,7 +844,7 @@
       <property name="geometry">
        <rect>
         <x>740</x>
-        <y>430</y>
+        <y>350</y>
         <width>521</width>
         <height>22</height>
        </rect>
@@ -863,7 +863,7 @@
       <property name="geometry">
        <rect>
         <x>740</x>
-        <y>550</y>
+        <y>470</y>
         <width>521</width>
         <height>22</height>
        </rect>
@@ -882,7 +882,7 @@
       <property name="geometry">
        <rect>
         <x>730</x>
-        <y>460</y>
+        <y>380</y>
         <width>60</width>
         <height>16</height>
        </rect>
@@ -895,7 +895,7 @@
       <property name="geometry">
        <rect>
         <x>730</x>
-        <y>400</y>
+        <y>320</y>
         <width>60</width>
         <height>16</height>
        </rect>
@@ -908,7 +908,7 @@
       <property name="geometry">
        <rect>
         <x>730</x>
-        <y>520</y>
+        <y>440</y>
         <width>60</width>
         <height>16</height>
        </rect>
@@ -921,7 +921,7 @@
       <property name="geometry">
        <rect>
         <x>100</x>
-        <y>600</y>
+        <y>610</y>
         <width>521</width>
         <height>22</height>
        </rect>
@@ -933,7 +933,7 @@
        <string extracomment="v_min"/>
       </property>
       <property name="maximum">
-       <number>500</number>
+       <number>1000</number>
       </property>
       <property name="value">
        <number>300</number>
@@ -949,7 +949,7 @@
       <property name="geometry">
        <rect>
         <x>90</x>
-        <y>570</y>
+        <y>580</y>
         <width>121</width>
         <height>16</height>
        </rect>
@@ -958,13 +958,153 @@
        <string>expose cam</string>
       </property>
      </widget>
+     <widget class="QSlider" name="slider_a_max">
+      <property name="geometry">
+       <rect>
+        <x>740</x>
+        <y>530</y>
+        <width>521</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="maximum">
+       <number>800</number>
+      </property>
+      <property name="value">
+       <number>400</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+     <widget class="QSlider" name="slider_a_min">
+      <property name="geometry">
+       <rect>
+        <x>100</x>
+        <y>530</y>
+        <width>521</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="statusTip">
+       <string extracomment="fsdsdf"/>
+      </property>
+      <property name="accessibleDescription">
+       <string extracomment="v_min"/>
+      </property>
+      <property name="maximum">
+       <number>500</number>
+      </property>
+      <property name="value">
+       <number>10</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_13">
+      <property name="geometry">
+       <rect>
+        <x>90</x>
+        <y>500</y>
+        <width>60</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>a_min</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_14">
+      <property name="geometry">
+       <rect>
+        <x>730</x>
+        <y>500</y>
+        <width>60</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>a_max</string>
+      </property>
+     </widget>
+     <widget class="QSlider" name="slider_a_fac">
+      <property name="geometry">
+       <rect>
+        <x>740</x>
+        <y>600</y>
+        <width>521</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="maximum">
+       <number>64</number>
+      </property>
+      <property name="value">
+       <number>8</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_15">
+      <property name="geometry">
+       <rect>
+        <x>730</x>
+        <y>570</y>
+        <width>60</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>a_fac</string>
+      </property>
+     </widget>
+     <widget class="QSlider" name="slider_kernel">
+      <property name="geometry">
+       <rect>
+        <x>740</x>
+        <y>670</y>
+        <width>521</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="minimum">
+       <number>3</number>
+      </property>
+      <property name="maximum">
+       <number>9</number>
+      </property>
+      <property name="singleStep">
+       <number>2</number>
+      </property>
+      <property name="value">
+       <number>8</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_16">
+      <property name="geometry">
+       <rect>
+        <x>730</x>
+        <y>640</y>
+        <width>60</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>kernel</string>
+      </property>
+     </widget>
     </widget>
    </widget>
    <widget class="QLabel_alterada" name="videoframe">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>20</y>
+      <x>20</x>
+      <y>10</y>
       <width>1024</width>
       <height>768</height>
      </rect>
@@ -1000,7 +1140,7 @@
      <rect>
       <x>10</x>
       <y>800</y>
-      <width>1051</width>
+      <width>1024</width>
       <height>431</height>
      </rect>
     </property>

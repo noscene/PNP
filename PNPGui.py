@@ -70,6 +70,9 @@ class PNPGui():
 
         # configure Video Thread
         self.th = VideoThread()
+        self.th2 = VideoThread()
+        self.changeSlider4Vision()
+
         if(sys.platform == 'linux'):    self.th.cam="/dev/video0"
         else:                           self.th.cam=1
 
@@ -80,7 +83,6 @@ class PNPGui():
     
 
         # configure Video Thread
-        self.th2 = VideoThread()
         if(sys.platform == 'linux'):    self.th2.cam="/dev/video1"
         else:                           self.th2.cam=0
         self.th2.myVideoFrame = self.ui.videoframe_2
@@ -99,12 +101,17 @@ class PNPGui():
 
 
         self.ui.slider_h_min.valueChanged.connect(self.changeSlider4Vision)
-        self.ui.slider_s_min.valueChanged.connect(self.changeSlider4Vision)
-        self.ui.slider_v_min.valueChanged.connect(self.changeSlider4Vision)
         self.ui.slider_h_max.valueChanged.connect(self.changeSlider4Vision)
+        self.ui.slider_s_min.valueChanged.connect(self.changeSlider4Vision)
         self.ui.slider_s_max.valueChanged.connect(self.changeSlider4Vision)
+        self.ui.slider_v_min.valueChanged.connect(self.changeSlider4Vision)
         self.ui.slider_v_max.valueChanged.connect(self.changeSlider4Vision)
+        self.ui.slider_a_min.valueChanged.connect(self.changeSlider4Vision)
+        self.ui.slider_a_max.valueChanged.connect(self.changeSlider4Vision)
         self.ui.slider_expose.valueChanged.connect(self.changeSlider4Vision)
+        self.ui.slider_a_fac.valueChanged.connect(self.changeSlider4Vision)
+        self.ui.slider_kernel.valueChanged.connect(self.changeSlider4Vision)
+        
         
     
     
@@ -112,7 +119,8 @@ class PNPGui():
     # Handling worker Jobs allow Steps if need interacting
     #
     def on_worker_event(self,n):
-        print("on_worker_event",n)          
+        print("on_worker_event",n)      
+        self.ui.lcdNumber.display(n)    
         workerItem = self.worker.states[n]  # get current Worker Item
         if workerItem['auto']:
             self.ui.check_step.setCheckState(2)
@@ -134,13 +142,24 @@ class PNPGui():
     # Helper Functions for Sliders
     def changeSlider4Vision(self):
         self.th.parms['h_min'] = self.ui.slider_h_min.value()
-        self.th.parms['s_min'] = self.ui.slider_s_min.value()
-        self.th.parms['v_min'] = self.ui.slider_v_min.value()
-        self.th.parms['v_min'] = self.ui.slider_v_min.value()
         self.th.parms['h_max'] = self.ui.slider_h_max.value()
+        self.th.parms['s_min'] = self.ui.slider_s_min.value()
         self.th.parms['s_max'] = self.ui.slider_s_max.value()
+        self.th.parms['v_min'] = self.ui.slider_v_min.value()
         self.th.parms['v_max'] = self.ui.slider_v_max.value()
+        self.th.parms['a_min'] = self.ui.slider_a_min.value()
+        self.th.parms['a_max'] = self.ui.slider_a_max.value()
         self.th.parms['expose'] = self.ui.slider_expose.value()
+        self.th.parms['a_fac'] = self.ui.slider_a_fac.value()
+        self.th.parms['kernel'] = self.ui.slider_kernel.value()
+        self.th.parms['canny_thrs1'] = 85
+        self.th.parms['canny_thrs2'] = 255
+        self.th.parms['dilate_count'] = 8
+        self.th.parms['erode_count'] = 6
+        self.th.parms['gauss_v1'] = 3
+        self.th.parms['gauss_v2'] = 3
+
+
         #self.th.parms['a_fac'] = self.ui.slider_a_fac.value()
         self.th2.parms = self.th.parms # For first Tests just use same Settings on both cams
         print("changeSlider4Vision", self.th.parms)
