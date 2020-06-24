@@ -71,7 +71,7 @@ class PNPGui():
         # configure Video Thread
         self.th = VideoThread()
         if(sys.platform == 'linux'):    self.th.cam="/dev/video0"
-        else:                           self.th.cam=0
+        else:                           self.th.cam=1
 
         self.th.myVideoFrame = self.ui.videoframe
         self.th.changePixmap.connect(self.th.setImageToGUI)
@@ -82,7 +82,7 @@ class PNPGui():
         # configure Video Thread
         self.th2 = VideoThread()
         if(sys.platform == 'linux'):    self.th2.cam="/dev/video1"
-        else:                           self.th2.cam=1
+        else:                           self.th2.cam=0
         self.th2.myVideoFrame = self.ui.videoframe_2
         self.th2.changePixmap.connect(self.th2.setImageToGUI)
         self.th2.mode=0

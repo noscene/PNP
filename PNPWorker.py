@@ -39,6 +39,7 @@ class PNPWorker(QThread):
         self.position_part_on_pcb = None    # [0]:x  [1]:y  [2]:angle 
         self.videoThreadTop = None
         self.videoThreadBottom = None
+        self.angel_from_pickup = 0
 
 
     def run(self):
@@ -62,6 +63,7 @@ class PNPWorker(QThread):
     def GO_PCBPART(self):           
         print(self.state_idx,"GO_PCBPART")
         self.gcode.ledHead_On()
+        self.angel_from_pickup=0    # reset Value
         self.gcode.driveto((self.position_part_on_pcb[0], self.position_part_on_pcb[1]))
     def MAKE_PCB_FOTO(self):        
         print(self.state_idx,"MAKE_PCB_FOTO")
@@ -72,6 +74,23 @@ class PNPWorker(QThread):
         print(self.state_idx,"CENTER_TO_CLOSE")
         self.gcode.vacuum1_On()
         self.gcode.vacuum2_On()
+
+
+        mm_faktor = 52.0 / 1024.0   # mm per 1024 pixel depend on cam position
+        x = (self.videoThreadTop.real_w / 2 - self.videoThreadTop.min_obj_x) * -1
+        y = self.videoThreadTop.real_h / 2 - self.videoThreadTop.min_obj_y
+
+        x_relativ_mm =  x * mm_faktor
+        y_relativ_mm =  y * mm_faktor
+
+
+        print("CENTER_TO_CLOSE",x_relativ_mm ,y_relativ_mm, self.videoThreadTop.real_w,self.videoThreadTop.real_h)
+        if(abs(x_relativ_mm) < 25 and abs(y_relativ_mm) < 25):
+            self.angel_from_pickup =  self.videoThreadTop.min_obj_angel
+            self.gcode.update_position_relative( x_relativ_mm , y_relativ_mm )  
+
+
+
     def GO_NOZZLE_OFFSET(self):     
         print(self.state_idx,"GO_NOZZLE_OFFSET")
         self.gcode.driveto((self.gcode.x + self.gcode.headoffset_x ,
@@ -90,7 +109,8 @@ class PNPWorker(QThread):
         print(self.state_idx,"GO_BOTTOMCAM")    
         self.gcode.driveto((self.gcode.bottom_cam_x,self.gcode.bottom_cam_y)) 
     def SET_ROTATION(self):         
-        print(self.state_idx,"SET_ROTATION")    
+        print(self.state_idx,"SET_ROTATION")   
+        self.gcode.update_rotation_relative(self.angel_from_pickup ) 
     def FIX_CENTER(self):           
         print(self.state_idx,"FIX_CENTER")   
         #self.gcode.driveto((100,100))

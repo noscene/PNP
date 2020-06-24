@@ -16,8 +16,8 @@ class PNPGCode():
         self.bottom_cam_x =   5.39        # machine parm
         self.bottom_cam_y =  34.73        # machine parm
 
-        self.headoffset_x =  18.69        # machine parm
-        self.headoffset_y = -46.97        # machine parm
+        self.headoffset_x =  18.64        # machine parm
+        self.headoffset_y = -46.87        # machine parm
         self.headoffset_active = False
 
         self.is_connected=False

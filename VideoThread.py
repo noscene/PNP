@@ -28,6 +28,8 @@ class VideoThread(QThread):
         self.h = 768
         self.cam = 0
 
+        self.real_w = 0
+        self.real_h = 0
 
     def setImageToGUI(self, image):
         self.myVideoFrame.setPixmap(QPixmap.fromImage(image))
@@ -63,6 +65,9 @@ class VideoThread(QThread):
 
                 rgbImage = cv2.cvtColor(rgbImage2, cv2.COLOR_BGR2RGB)
                 h, w, ch = rgbImage.shape
+
+                self.real_w = w
+                self.real_h = h
 
                 self.draw_crosshair(rgbImage,w,h)
                 bytesPerLine = ch * w
