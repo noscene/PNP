@@ -16,12 +16,12 @@ def main():
     gcode.setupGui(ui)          # Setup Button Callback for gcode commands
     gui = PNPGui(ui,gcode)      # create UI
 
-
-    df_feeders = pd.read_csv('feeder.csv', sep=";", names=["Tray","NR","X","Y","W","H","Footprint","Value","Vision"] )
+    # names=["Tray","NR","X","Y","W","H","Z","Footprint","Value","Vision"]
+    df_feeders = pd.read_csv('feeder.csv', sep=";", header=0  )
     gui.df_feeders = df_feeders.applymap(lambda x: x.strip() if isinstance(x, str) else x) # Trim Strings for query
 
 
-    df_footprints = pd.read_csv('footprints.csv', sep=";", names=["Footprint","X","Y","H"] )
+    df_footprints = pd.read_csv('footprints.csv', sep=";", names=["Footprint","X","Y","Z"] )
     gui.df_footprints = df_footprints.applymap(lambda x: x.strip() if isinstance(x, str) else x) # Trim Strings for query
 
     # 0201 -> 501

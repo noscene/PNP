@@ -23,7 +23,7 @@ class PNPWorker(QThread):
                         {'name': self.SELENOID_ON,       'wait': 1.0, 'auto': True},
                         {'name': self.NOZZLE_UP,         'wait': 1.0, 'auto': True},
                         {'name': self.GO_BOTTOMCAM,      'wait': 1.0, 'auto': True},
-                        {'name': self.SET_ROTATION,      'wait': 1.0, 'auto': True},
+                        {'name': self.SET_ROTATION,      'wait': 1.0, 'auto': False},
                         {'name': self.FIX_CENTER,        'wait': 1.0, 'auto': True},
                         {'name': self.GO_PCB_PLACE,      'wait': 1.0, 'auto': False},
                         {'name': self.NOZZLE_DOWN2,      'wait': 1.0, 'auto': True},
@@ -37,6 +37,8 @@ class PNPWorker(QThread):
         self.feeder = None
         self.footprint = None
         self.position_part_on_pcb = None    # [0]:x  [1]:y  [2]:angle 
+        self.videoThreadTop = None
+        self.videoThreadBottom = None
 
 
     def run(self):
@@ -61,7 +63,8 @@ class PNPWorker(QThread):
         print(self.state_idx,"GO_PCBPART")
         self.gcode.ledHead_On()
         self.gcode.driveto((self.position_part_on_pcb[0], self.position_part_on_pcb[1]))
-    def MAKE_PCB_FOTO(self):        print(self.state_idx,"MAKE_PCB_FOTO")
+    def MAKE_PCB_FOTO(self):        
+        print(self.state_idx,"MAKE_PCB_FOTO")
     def GO_FEEDER(self):            
         print(self.state_idx,"GO_FEEDER")
         self.gcode.driveto((self.feeder.X + self.feeder.W/2 ,self.feeder.Y + self.feeder.H/2))
@@ -70,17 +73,19 @@ class PNPWorker(QThread):
         self.gcode.vacuum1_On()
         self.gcode.vacuum2_On()
     def GO_NOZZLE_OFFSET(self):     
+        print(self.state_idx,"GO_NOZZLE_OFFSET")
         self.gcode.driveto((self.gcode.x + self.gcode.headoffset_x ,
                             self.gcode.y + self.gcode.headoffset_y   ))
 
-        print(self.state_idx,"GO_NOZZLE_OFFSET")
     def NOZZLE_DOWN(self):          
-        print(self.state_idx,"NOZZLE_DOWN")    
+        print(self.state_idx,"NOZZLE_DOWN", self.feeder.Z - self.footprint.Z)
+        self.gcode.driveZ(self.feeder.Z - self.footprint.Z)
     def SELENOID_ON(self):          
         print(self.state_idx,"SELENOID_ON")
-        #self.gcode.driveto((100,10))
+        self.gcode.selenoid_on()
     def NOZZLE_UP(self):            
         print(self.state_idx,"NOZZLE_UP")
+        self.gcode.driveZ(4)
     def GO_BOTTOMCAM(self):         
         print(self.state_idx,"GO_BOTTOMCAM")    
         self.gcode.driveto((self.gcode.bottom_cam_x,self.gcode.bottom_cam_y)) 
@@ -94,11 +99,20 @@ class PNPWorker(QThread):
         #
         # TODO: add the currentOffset from self.gcode.x - self.gcode.bottom_cam_x
         #
-        self.gcode.driveto((self.position_part_on_pcb[0]  + self.gcode.headoffset_x  , 
-                            self.position_part_on_pcb[1]  + self.gcode.headoffset_y )) 
+        delta_x = self.gcode.x - self.gcode.bottom_cam_x 
+        delta_y = self.gcode.y - self.gcode.bottom_cam_y  
+
+        self.gcode.driveto((self.position_part_on_pcb[0]  + self.gcode.headoffset_x + delta_x , 
+                            self.position_part_on_pcb[1]  + self.gcode.headoffset_y + delta_y )) 
     def NOZZLE_DOWN2(self):         
-        print(self.state_idx,"NOZZLE_DOWN2")    
+        print(self.state_idx,"NOZZLE_DOWN2")   
+        self.gcode.driveZ(11.5 - self.footprint.Z)  # TODO: Add PCB Z Param
     def SELENOID_OFF(self):         
         print(self.state_idx,"SELENOID_OFF")    
+        self.gcode.selenoid_off()
     def FINISHED(self):             
+        self.gcode.driveZ(4.0) 
+        self.gcode.vacuum1_Off() 
+        self.gcode.vacuum2_Off() 
+
         print(self.state_idx,"FINISHED")    

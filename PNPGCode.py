@@ -97,7 +97,7 @@ class PNPGCode():
         if(self.z<2):
             print("Bad z:",self.z)
             return
-        if(self.z>20):
+        if(self.z>12):       # max deep for juki nozzle
             print("Bad z:",self.z)
             return
         gcode="G1 Z-"+ str(self.z) +" F7000\r\n"
@@ -171,11 +171,11 @@ class PNPGCode():
     def gc_down10(self):    self.update_position_relative(0,-6)
     def gc_down100(self):   self.update_position_relative(0,-60)
 
-    def gc_left1(self):     self.update_position_relative(-0.3,0)
+    def gc_left1(self):     self.update_position_relative(-0.1,0)
     def gc_left10(self):    self.update_position_relative(-6,0)
     def gc_left100(self):   self.update_position_relative(-60,0)
 
-    def gc_right1(self):    self.update_position_relative(0.3,0)
+    def gc_right1(self):    self.update_position_relative(0.1,0)
     def gc_right10(self):   self.update_position_relative(6,0)
     def gc_right100(self):  self.update_position_relative(60,0)
 

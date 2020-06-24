@@ -175,7 +175,7 @@ class PNPGui():
         try: grid.itemChanged.disconnect() # avoid any msg when redraw
         except Exception: pass
         df = self.df_footprints
-        self.footprint_list_headers = ['Feeder','Footprint','X', 'Y', 'H','Nozzle','GoFeeder']
+        self.footprint_list_headers = ['Feeder','Footprint','X', 'Y', 'Z','Nozzle','GoFeeder']
         grid.setColumnCount(7)
         grid.setHorizontalHeaderLabels(self.footprint_list_headers)
         grid.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
@@ -185,7 +185,7 @@ class PNPGui():
             grid.setItem(index,1,QtWidgets.QTableWidgetItem(str(row['Footprint']))) 
             grid.setItem(index,2,QtWidgets.QTableWidgetItem(str(row['X']))) 
             grid.setItem(index,3,QtWidgets.QTableWidgetItem(str(row['Y']))) 
-            grid.setItem(index,4,QtWidgets.QTableWidgetItem(str(row['H']))) 
+            grid.setItem(index,4,QtWidgets.QTableWidgetItem(str(row['Z']))) 
             grid.setItem(index,5,QtWidgets.QTableWidgetItem(str(row['Nozzle']))) 
             grid.setCellWidget(index, 6, ButtonBlock("go",row, self.onGoButtonFootprint))
         grid.itemChanged.connect(self.changeFootprintItemn)
@@ -212,8 +212,8 @@ class PNPGui():
         try: grid.itemChanged.disconnect() # avoid any msg when redraw
         except Exception: pass
         df = self.df_feeders
-        self.feeder_list_headers = ["Tray","Vision","NR","X","Y","W","H","Footprint","Value"]
-        grid.setColumnCount(10)
+        self.feeder_list_headers = ["Tray","Vision","NR","X","Y","W","H","Z","Footprint","Value"]
+        grid.setColumnCount(11)
         grid.setHorizontalHeaderLabels(self.feeder_list_headers)
         grid.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
         grid.setRowCount(len(df.index))
@@ -225,9 +225,10 @@ class PNPGui():
             grid.setItem(index,4,QtWidgets.QTableWidgetItem(str(row['Y']))) 
             grid.setItem(index,5,QtWidgets.QTableWidgetItem(str(row['W']))) 
             grid.setItem(index,6,QtWidgets.QTableWidgetItem(str(row['H']))) 
-            grid.setItem(index,7,QtWidgets.QTableWidgetItem(str(row['Footprint']))) 
-            grid.setItem(index,8,QtWidgets.QTableWidgetItem(str(row['Value']))) 
-            grid.setCellWidget(index, 9, ButtonBlock("go",row, self.onGoButtonFeeder))
+            grid.setItem(index,7,QtWidgets.QTableWidgetItem(str(row['Z']))) 
+            grid.setItem(index,8,QtWidgets.QTableWidgetItem(str(row['Footprint']))) 
+            grid.setItem(index,9,QtWidgets.QTableWidgetItem(str(row['Value']))) 
+            grid.setCellWidget(index, 10, ButtonBlock("go",row, self.onGoButtonFeeder))
         grid.itemChanged.connect(self.changeFeederItemn)
 
     def changeFeederItemn(self,item):
@@ -239,7 +240,7 @@ class PNPGui():
             self.df_feeders.at[row, col_name] = item.text()
         except:
             print ("changeFootprintItemn ERROR invalid value",row,col,col_name,item.text())
-        self.df_feeders.to_csv('feeder2.csv', sep=";", header=False,index=False, columns=["Tray","NR","X","Y","W","H","Footprint","Value","Vision"])
+        self.df_feeders.to_csv('feeder.csv', sep=";", header=True,index=False, columns=["Tray","NR","X","Y","W","H","Z","Footprint","Value","Vision"])
 
     def onGoButtonFeeder(self,item):
         print("onGoButtonFeeder",item.X + item.W / 2.0 , item.Y + item.H / 2.0)
@@ -300,6 +301,8 @@ class PNPGui():
         print("onSimButtonPartlist::Footprint",self.worker.footprint)
         print("onSimButtonPartlist::feeder",self.worker.feeder)
         self.worker.position_part_on_pcb = self.getMotorPositionForPart(row)
+        self.worker.videoThreadTop = self.th
+        self.worker.videoThreadBottom = self.th2
         self.worker.state_idx=0
         self.worker.start()
 
@@ -453,7 +456,7 @@ class PNPGui():
         # ['PART','Footprint','Value','X', 'Y', 'R','Go']
         footprints={}
         for index, row in self.df_footprints.iterrows():
-            footprints[row['Footprint']] = PNPFootprint({ 'x': row['X'], 'y': row['Y'], 'h': row['H'] })
+            footprints[row['Footprint']] = PNPFootprint({ 'x': row['X'], 'y': row['Y'], 'z': row['Z'] })
         #print(footprints)
 
         # create Image

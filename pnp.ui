@@ -482,7 +482,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>4</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tabpannel">
      <attribute name="title">
@@ -498,7 +498,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>3</string>
+       <string>2</string>
       </property>
      </widget>
      <widget class="QLabel" name="label">
@@ -524,7 +524,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>2</string>
+       <string>1</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_2">
@@ -563,7 +563,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>60</string>
+       <string>50</string>
       </property>
      </widget>
      <widget class="QLineEdit" name="pcb_h">
@@ -576,7 +576,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>50</string>
+       <string>60</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_9">
@@ -936,10 +936,10 @@
        <number>500</number>
       </property>
       <property name="value">
-       <number>65</number>
+       <number>300</number>
       </property>
       <property name="sliderPosition">
-       <number>65</number>
+       <number>300</number>
       </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>

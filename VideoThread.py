@@ -18,11 +18,12 @@ class VideoThread(QThread):
                         'canny_thrs1' : 150,  'canny_thrs2' : 255,
                         'dilate_count' : 8,   'erode_count' : 6,
                         'gauss_v1' : 3,       'gauss_v2' : 3 ,
-                        'expose' : 65 } # TODO: add area treshold, limit
+                        'expose' : 300 } # TODO: add area treshold, limit
         self.mode = 0
         self.min_obj_distance = 9999
         self.min_obj_x = 0
         self.min_obj_y = 0
+        self.min_obj_angel = 0
         self.w = 1024
         self.h = 768
         self.cam = 0
@@ -108,10 +109,10 @@ class VideoThread(QThread):
             hor= np.hstack(imgArray)
             ver = hor
         return ver
-    def angle_between(self, p1, p2):
-        ang1 = np.arctan2(*p1[::-1])
-        ang2 = np.arctan2(*p2[::-1])
-        return np.rad2deg((ang1 - ang2) % (2 * np.pi))
+    #def angle_between(self, p1, p2):
+    #    ang1 = np.arctan2(*p1[::-1])
+    #    ang2 = np.arctan2(*p2[::-1])
+    #    return np.rad2deg((ang1 - ang2) % (2 * np.pi))
 
             
     def subimage(self, image, center, theta, width, height):
@@ -216,6 +217,7 @@ class VideoThread(QThread):
                     if self.min_obj_distance > distance_to_center:
                         self.min_obj_x = cX
                         self.min_obj_y = cY
+                        self.min_obj_angel = round(angle,1)
                         self.min_obj_distance = distance_to_center
 
                     # check orientation , real size
