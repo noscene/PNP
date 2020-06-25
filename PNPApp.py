@@ -33,7 +33,12 @@ def main():
     gui.df_footprints['Feeder']='1'
     gui.df_footprints['Nozzle']='1'
 
-    gui.df_parts = pd.read_csv('test_m104.mnt', sep="\s+", names=["PART","X","Y","R","Value","Footprint"] )
+    df_parts = pd.read_csv('test_m104.mnt', sep="\s+", names=["PART","X","Y","R","Value","Footprint"] )
+    df_parts['Placed']='0'
+
+    #df_parts = df_parts[df_parts['PART'].str.contains("7") | df_parts['Footprint'].str.contains('7')]     
+
+    gui.df_parts = df_parts.sort_values(by=['Value','PART']).reset_index(drop=True)
 
     gui.setFootprintTable()
     gui.setFeederTable()

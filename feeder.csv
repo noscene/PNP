@@ -7,3 +7,10 @@ Tray1;4;5.0;300.0;50.0;50.0;10.0;SEEED-SWITCH_SW4-SMD-4.2X3.2X2.5MM;DHT-4235A;{'
 Tray1;5;55.0;300.0;50.0;50.0;10.0;SOT89;HT7333;{'h_min': 0, 'h_max': 255, 's_min': 0, 's_max': 255, 'v_min': 0, 'v_max': 255, 'a_min': 21, 'a_max': 215, 'expose': 245, 'a_fac': 8, 'canny_thrs1': 150, 'canny_thrs2': 255, 'dilate_count': 8, 'erode_count': 6, 'gauss_v1': 3, 'gauss_v2': 3}
 Tray1;6;105.0;300.0;50.0;50.0;10.0;U.FL;U.FL;{'h_min': 0, 'h_max': 255, 's_min': 0, 's_max': 255, 'v_min': 0, 'v_max': 255, 'a_min': 21, 'a_max': 215, 'expose': 245, 'a_fac': 8, 'canny_thrs1': 150, 'canny_thrs2': 255, 'dilate_count': 8, 'erode_count': 6, 'gauss_v1': 3, 'gauss_v2': 3}
 Tray1;7;155.0;300.0;50.0;50.0;10.0;PSON127P500X600X82-9N;SIM-ST-MFF2;{expose:12}
+Tape;8;155.0;300.0;50.0;50.0;10.0;C0603K;10uF;{expose:12}
+Tape;9;155.0;300.0;50.0;50.0;10.0;C0402K;100n;{expose:12}
+Tape;10;222.0;192.0;50.0;50.0;13.5;C0603;red;{expose:12}
+Tape;11;155.0;300.0;50.0;50.0;10.0;R0603;1K;{expose:12}
+Tape;12;152.0;227.0;50.0;50.0;13.5;R0603;22R;{expose:12}
+Tape;13;155.0;300.0;50.0;50.0;10.0;R0603;330K;{expose:12}
+Tape;14;155.0;300.0;50.0;50.0;10.0;R0603;47K;{expose:12}

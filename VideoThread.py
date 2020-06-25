@@ -21,7 +21,7 @@ class VideoThread(QThread):
         self.w = 1024
         self.h = 768
         self.cam = 0
-
+        self.flip = False
         self.real_w = 0
         self.real_h = 0
 
@@ -46,6 +46,36 @@ class VideoThread(QThread):
 
         # print("sys.platform",sys.platform)
 
+        '''
+        4K TopCam
+		Size: Discrete 1600x1200			Interval: Discrete 0.067s (15.000 fps)
+		Size: Discrete 3264x2448			Interval: Discrete 0.067s (15.000 fps)
+		Size: Discrete 2592x1944			Interval: Discrete 0.067s (15.000 fps)
+		Size: Discrete 2048x1536			Interval: Discrete 0.067s (15.000 fps)
+		Size: Discrete 1280x960			    Interval: Discrete 0.067s (15.000 fps)
+		Size: Discrete 1024x768			    Interval: Discrete 0.033s (30.000 fps)
+		Size: Discrete 800x600			    Interval: Discrete 0.033s (30.000 fps)
+		Size: Discrete 640x480			    Interval: Discrete 0.033s (30.000 fps)
+		Size: Discrete 320x240			    Interval: Discrete 0.033s (30.000 fps)
+		Size: Discrete 1600x1200			Interval: Discrete 0.067s (15.000 fps)
+
+
+        4K BottomCam
+		Size: Discrete 1280x720			Interval: Discrete 0.100s (10.000 fps)
+		Size: Discrete 640x480			Interval: Discrete 0.033s (30.000 fps)
+		Size: Discrete 352x288			Interval: Discrete 0.033s (30.000 fps)
+		Size: Discrete 320x240			Interval: Discrete 0.033s (30.000 fps)
+		Size: Discrete 176x144			Interval: Discrete 0.033s (30.000 fps)
+		Size: Discrete 160x120			Interval: Discrete 0.033s (30.000 fps)
+		Size: Discrete 800x600			Interval: Discrete 0.050s (20.000 fps)
+		Size: Discrete 960x720			Interval: Discrete 0.067s (15.000 fps)
+        '''
+
+
+
+
+
+
 
         while True:
             cap.set(cv2.CAP_PROP_EXPOSURE,self.parms["expose"])
@@ -55,10 +85,17 @@ class VideoThread(QThread):
                 
             if ret:
                 # https://stackoverflow.com/a/55468544/6622587
+                
+                if self.flip:
+                    frame = cv2.flip(frame, 0)
+                
                 rgbImage2=self.searchForRectangles(frame)
 
                 rgbImage = cv2.cvtColor(rgbImage2, cv2.COLOR_BGR2RGB)
                 h, w, ch = rgbImage.shape
+
+
+                #print("rgbImage",w,h,self.flip)
 
                 self.real_w = w
                 self.real_h = h
@@ -66,7 +103,7 @@ class VideoThread(QThread):
                 self.draw_crosshair(rgbImage,w,h)
                 bytesPerLine = ch * w
                 convertToQtFormat = QImage(rgbImage.data, w, h, bytesPerLine, QImage.Format_RGB888)
-                p = convertToQtFormat.scaled(self.w, self.h, Qt.KeepAspectRatio)
+                p = convertToQtFormat.scaled(800, 600, Qt.KeepAspectRatio)
                 self.changePixmap.emit(p)
 
     def draw_crosshair(self,frame,w,h): #fadenkreuz, absehen
@@ -146,6 +183,8 @@ class VideoThread(QThread):
         lower       = np.array([parms['h_min'],parms['s_min'],parms['v_min']])
         upper       = np.array([parms['h_max'],parms['s_max'],parms['v_max']])
         mask        = cv2.inRange(imgHSV2,lower,upper)
+       # mask        = cv2.bitwise_not(mask)
+
         imgResult   = cv2.bitwise_and(frame0,frame0,mask=mask)
         gray2       = cv2.cvtColor(imgResult, cv2.COLOR_BGR2GRAY) 
         gray        = cv2.GaussianBlur(gray2,(parms['gauss_v1'],parms['gauss_v2']),cv2.BORDER_DEFAULT)
@@ -175,7 +214,10 @@ class VideoThread(QThread):
                 alpha = 0
                 cX=0
                 cY=0
-                if( len(approx) == 4 or len(approx) == 24 ): # avoid div/0
+
+                #print("len approx", len(approx))
+
+                if( len(approx) == 4 or len(approx) == 11 ): # 11= SOT363
                     M = cv2.moments(approx)
 
                     objNumber+=1
@@ -230,8 +272,11 @@ class VideoThread(QThread):
 
         
         if self.mode==4 :
+
+            # simg = self.subimage(frame0, center=(512, 384), theta=30, width=512, height=384)
+
             imgstack = self.stackImages(0.3, (  [edged,         frame0,  mask],
-                                                [imgContour,    imgHSV, imgEroded] ) )
+                                                [imgContour,    imgHSV2, imgEroded] ) )
             return imgstack
         else: 
             return imgContour

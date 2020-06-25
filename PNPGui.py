@@ -61,7 +61,11 @@ class PNPGui():
         # simple Validation on numeric fields
         self.ui.gc_mpos_x.setValidator( QDoubleValidator(0, 230.0 ,8) )
         self.ui.gc_mpos_y.setValidator( QDoubleValidator(0, 280.0 ,8) )
+        self.ui.pcb_preview_scale.setValidator( QDoubleValidator(0, 12.0 ,8) )
+        
       
+        self.ui.status_label.setText("-")
+        self.ui.status_label.setStyleSheet('color: red')
         
         self.ui.pannel_update_bt.clicked.connect(self.loadFiducialList)
 
@@ -80,6 +84,8 @@ class PNPGui():
         self.th.myVideoFrame = self.ui.videoframe
         self.th.changePixmap.connect(self.th.setImageToGUI)
         self.th.mode=0
+        #self.th.w = 1600
+        #self.th.h = 1200
         self.th.start()
     
 
@@ -89,6 +95,7 @@ class PNPGui():
         self.th2.myVideoFrame = self.ui.videoframe_2
         self.th2.changePixmap.connect(self.th2.setImageToGUI)
         self.th2.mode=0
+        self.th2.flip=True
         self.th2.start()
 
         self.worker = PNPWorker()
@@ -99,6 +106,7 @@ class PNPGui():
 
 
         self.ui.videoframe.clicked.connect(self.onVideoMouseEvent) 
+        self.ui.videoframe_2.clicked.connect(self.onVideoMouseEvent2) 
 
 
         self.ui.slider_h_min.valueChanged.connect(self.changeSlider4Vision)
@@ -181,6 +189,9 @@ class PNPGui():
         print("changeSlider4Vision", parms)
 
 
+    def onVideoMouseEvent2(self):
+        global mouse_click
+        print("onVideoMouseEvent2",mouse_click)
 
 
     def onVideoMouseEvent(self):
@@ -303,17 +314,23 @@ class PNPGui():
             grid.setItem(index,4,QtWidgets.QTableWidgetItem(str(row['Y']))) 
             grid.setItem(index,5,QtWidgets.QTableWidgetItem(str(row['R']))) 
 
+
+
+            error_row_count=0
             # query for existing Footprint, need trim strings on import!
             query = 'Footprint == "'+str(row['Footprint'])+'" and X > 0 '
             if self.df_footprints.query( query )['Footprint'].count() == 0:
                 grid.item(index, 1).setBackground(Qt.yellow)
+                error_row_count+=1
 
             query = 'Footprint == "'+str(row['Footprint'])+'" and Value =="'+str(row['Value'])+'" '
             if self.df_feeders.query( query )['Value'].count() == 0:
                 grid.item(index, 2).setBackground(Qt.yellow)                
+                error_row_count+=1
 
             grid.setCellWidget(index, 6, ButtonBlock("go",row, self.onGoButtonPartlist))
-            grid.setCellWidget(index, 7, ButtonBlock("Sim",row, self.onSimButtonPartlist))
+            if(error_row_count==0):
+                grid.setCellWidget(index, 7, ButtonBlock("Sim",(index,row), self.onSimButtonPartlist))
 
         grid.itemChanged.connect(self.changePartItemn)
         self.ui.lcdNumber.display(len(df.index))
@@ -329,8 +346,13 @@ class PNPGui():
             print ("changePartItemn ERROR invalid value",row,col,col_name,item.text())
             self.showPartList()   # restore list
 
-    def onSimButtonPartlist(self,row):
-        print("onSimButtonPartlist", row)
+    def onSimButtonPartlist(self,obj):
+        row = obj[1]
+        index = obj[0]
+        print("onSimButtonPartlist", index, row)
+        self.ui.parts_table.item(index, 0).setBackground(Qt.green)  
+
+        self.ui.status_label.setText("PLACE " + row.PART + " " + row.Value + " " + row.Footprint)
         self.worker.footprint = self.df_footprints.query( 'Footprint == "'+str(row['Footprint'])+'" and X > 0 ' ).iloc[0]
         self.worker.feeder    = self.df_feeders.query( 'Footprint == "'+str(row['Footprint'])+'" and Value =="'+str(row['Value'])+'" ').iloc[0]
         print("onSimButtonPartlist::Footprint",self.worker.footprint)
@@ -369,6 +391,7 @@ class PNPGui():
 
 
     def onGoButtonPartlist(self,row):
+        self.ui.status_label.setText("GO " + row.PART + " " + row.Value + " " + row.Footprint)
         pos_to_move = self.getMotorPositionForPart(row)
         print("pos_to_move",pos_to_move[0],pos_to_move[1])
         print("angle",pos_to_move[2])
@@ -483,7 +506,7 @@ class PNPGui():
         pannel_y = int(self.ui.pannel_y.text())
         pannel = PNPPcbPannel(pcb,5,20,(pannel_x,pannel_y)) # pcb Offset , layout
 
-        pannel.scale=5.0
+        pannel.scale=float(self.ui.pcb_preview_scale.text())
         
         #traySet.drawTrays(imageBlank)
         #traySet2.drawTrays(imageBlank)

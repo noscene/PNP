@@ -17,10 +17,10 @@ class PNPWorker(QThread):
         self.states = [ {'name': self.GO_PCBPART,        'wait': 1.0, 'auto': True},
                         {'name': self.MAKE_PCB_FOTO,     'wait': 1.0, 'auto': True},
                         {'name': self.GO_FEEDER,         'wait': 1.0, 'auto': False},
-                        {'name': self.CENTER_TO_CLOSE,   'wait': 1.0, 'auto': True},
+                        {'name': self.CENTER_TO_CLOSE,   'wait': 3.0, 'auto': True},
                         {'name': self.GO_NOZZLE_OFFSET,  'wait': 1.0, 'auto': False},
                         {'name': self.NOZZLE_DOWN,       'wait': 1.0, 'auto': True},
-                        {'name': self.SELENOID_ON,       'wait': 1.0, 'auto': True},
+                        {'name': self.SELENOID_ON,       'wait': 1.0, 'auto': False},
                         {'name': self.NOZZLE_UP,         'wait': 1.0, 'auto': True},
                         {'name': self.GO_BOTTOMCAM,      'wait': 1.0, 'auto': True},
                         {'name': self.SET_ROTATION,      'wait': 1.0, 'auto': True},
@@ -46,17 +46,18 @@ class PNPWorker(QThread):
 
         while True:
             current_state = self.states[self.state_idx]     # loopup state
+            self.next_step_enable = False                   # prepair for waiting
             self.event.emit(self.state_idx)                 # call UI
             while not self.next_step_enable:                # Wait for enable Step
-                pass
+                time.sleep(0.1)
 
             time_to_wait = current_state['wait']
             time.sleep(time_to_wait)                        # wait
-            print(self.state_idx,"UI Finished")
+            # print(self.state_idx,"UI Finished")
             current_state['name']()                         # call function
             if( self.state_idx < len(self.states)-1 ):
                 self.state_idx+=1
-                self.next_step_enable = False
+                
             else:
                 return                                      # Stop and Return
 

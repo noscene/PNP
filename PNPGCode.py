@@ -97,7 +97,7 @@ class PNPGCode():
         if(self.z<2):
             print("Bad z:",self.z)
             return
-        if(self.z>12):       # max deep for juki nozzle
+        if(self.z>13):       # max deep for juki nozzle
             print("Bad z:",self.z)
             return
         gcode="G1 Z-"+ str(self.z) +" F7000\r\n"
@@ -106,7 +106,7 @@ class PNPGCode():
         self.alpha = int(alpha)
         gcode="G1 E"+ str(self.alpha) +" F1500 \r\n"
         self.sendGCode(gcode,0)
-        time.sleep(1)
+        time.sleep(0.1)
     def motoroff(self):     self.sendGCode("M84\r\n",0)
     def goHome(self):  
         self.sendGCode("G28\r\n",0)
