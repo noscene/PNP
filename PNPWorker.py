@@ -17,15 +17,15 @@ class PNPWorker(QThread):
         self.states = [ {'name': self.GO_PCBPART,        'wait': 1.0, 'auto': True},
                         {'name': self.MAKE_PCB_FOTO,     'wait': 1.0, 'auto': True},
                         {'name': self.GO_FEEDER,         'wait': 1.0, 'auto': False},
-                        {'name': self.CENTER_TO_CLOSE,   'wait': 1.0, 'auto': False},
+                        {'name': self.CENTER_TO_CLOSE,   'wait': 1.0, 'auto': True},
                         {'name': self.GO_NOZZLE_OFFSET,  'wait': 1.0, 'auto': False},
-                        {'name': self.NOZZLE_DOWN,       'wait': 1.0, 'auto': False},
+                        {'name': self.NOZZLE_DOWN,       'wait': 1.0, 'auto': True},
                         {'name': self.SELENOID_ON,       'wait': 1.0, 'auto': True},
                         {'name': self.NOZZLE_UP,         'wait': 1.0, 'auto': True},
                         {'name': self.GO_BOTTOMCAM,      'wait': 1.0, 'auto': True},
-                        {'name': self.SET_ROTATION,      'wait': 1.0, 'auto': False},
-                        {'name': self.FIX_CENTER,        'wait': 1.0, 'auto': True},
-                        {'name': self.GO_PCB_PLACE,      'wait': 1.0, 'auto': False},
+                        {'name': self.SET_ROTATION,      'wait': 1.0, 'auto': True},
+                        {'name': self.FIX_CENTER,        'wait': 1.0, 'auto': False},
+                        {'name': self.GO_PCB_PLACE,      'wait': 1.0, 'auto': True},
                         {'name': self.NOZZLE_DOWN2,      'wait': 1.0, 'auto': True},
                         {'name': self.SELENOID_OFF,      'wait': 1.0, 'auto': True},
                         {'name': self.FINISHED,          'wait': 1.0, 'auto': True} ]
@@ -75,7 +75,6 @@ class PNPWorker(QThread):
         self.gcode.vacuum1_On()
         self.gcode.vacuum2_On()
 
-
         mm_faktor = 52.0 / 1024.0   # mm per 1024 pixel depend on cam position
         x = (self.videoThreadTop.real_w / 2 - self.videoThreadTop.min_obj_x) * -1
         y = self.videoThreadTop.real_h / 2 - self.videoThreadTop.min_obj_y
@@ -107,6 +106,7 @@ class PNPWorker(QThread):
         self.gcode.driveZ(4)
     def GO_BOTTOMCAM(self):         
         print(self.state_idx,"GO_BOTTOMCAM")    
+        self.gcode.ledBottom_On()
         self.gcode.driveto((self.gcode.bottom_cam_x,self.gcode.bottom_cam_y)) 
     def SET_ROTATION(self):         
         print(self.state_idx,"SET_ROTATION")   
@@ -116,6 +116,7 @@ class PNPWorker(QThread):
         #self.gcode.driveto((100,100))
     def GO_PCB_PLACE(self):         
         print(self.state_idx,"GO_PCB_PLACE")   
+        self.gcode.ledBottom_Off()
         #
         # TODO: add the currentOffset from self.gcode.x - self.gcode.bottom_cam_x
         #

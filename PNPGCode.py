@@ -188,6 +188,8 @@ class PNPGCode():
     def gc_z_up(self):     self.update_z_position_relative(-1)
     def gc_z_down(self):   self.update_z_position_relative(1)
 
+    def go_bottom_cam(self):  
+        self.driveto((self.bottom_cam_x, self.bottom_cam_y))
 
     def gc_go_absolute(self):
         print(self.ui.gc_mpos_x.text(),self.ui.gc_mpos_y.text())
@@ -244,7 +246,10 @@ class PNPGCode():
         self.ui.gc_go_absolute.clicked.connect( self.gc_go_absolute)
 
         self.ui.gc_head_pick.clicked.connect(self.toogle_head_cam_center)
+        self.ui.gc_bottom_cam.clicked.connect(self.go_bottom_cam)
   
+
+
         self.ui.gc_led_head.clicked.connect( self.gc_led_head)
         self.ui.gc_led_bottom.clicked.connect( self.gc_led_bottom)
         self.ui.gc_vacuum1.clicked.connect( self.gc_vacuum1)

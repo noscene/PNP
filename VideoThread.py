@@ -70,12 +70,12 @@ class VideoThread(QThread):
                 self.changePixmap.emit(p)
 
     def draw_crosshair(self,frame,w,h): #fadenkreuz, absehen
-        cv2.line(img=frame, pt1=(0, int(h/2)), pt2=(w, int(h/2)), color=(0, 255, 255), thickness = 2, lineType = 8, shift = 0)
-        cv2.line(img=frame, pt1=(int(w/2), 0), pt2=(int(w/2), h), color=(0, 255, 255), thickness = 2, lineType = 8, shift = 0)
+        cv2.line(img=frame, pt1=(0, int(h/2)), pt2=(w, int(h/2)), color=(0, 255, 255), thickness = 1, lineType = 8, shift = 0)
+        cv2.line(img=frame, pt1=(int(w/2), 0), pt2=(int(w/2), h), color=(0, 255, 255), thickness = 1, lineType = 8, shift = 0)
         lines = 32
         for x in range(lines):
-            cv2.line(img=frame, pt1=(int(w/lines*x), int(h/2-10) ), pt2=(int(w/lines*x), int(h/2+10) ), color=(0, 255, 255), thickness = 2, lineType = 8, shift = 0)
-            cv2.line(img=frame, pt1=(int(w/2-10), int(h/lines*x) ), pt2=( int(w/2+10), int(h/lines*x) ), color=(0, 255, 255), thickness = 2, lineType = 8, shift = 0)
+            cv2.line(img=frame, pt1=(int(w/lines*x), int(h/2-10) ), pt2=(int(w/lines*x), int(h/2+10) ), color=(0, 255, 255), thickness = 1, lineType = 8, shift = 0)
+            cv2.line(img=frame, pt1=(int(w/2-10), int(h/lines*x) ), pt2=( int(w/2+10), int(h/lines*x) ), color=(0, 255, 255), thickness = 1, lineType = 8, shift = 0)
         return frame
 
     def stackImages(self,scale,imgArray):

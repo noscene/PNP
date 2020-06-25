@@ -450,7 +450,7 @@
       <rect>
        <x>470</x>
        <y>80</y>
-       <width>91</width>
+       <width>131</width>
        <height>32</height>
       </rect>
      </property>
@@ -469,6 +469,19 @@
      </property>
      <property name="text">
       <string>check Step</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="gc_bottom_cam">
+     <property name="geometry">
+      <rect>
+       <x>470</x>
+       <y>120</y>
+       <width>131</width>
+       <height>32</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>go BottomCam</string>
      </property>
     </widget>
    </widget>
