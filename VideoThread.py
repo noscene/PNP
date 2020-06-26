@@ -18,8 +18,8 @@ class VideoThread(QThread):
         self.min_obj_x = 0
         self.min_obj_y = 0
         self.min_obj_angel = 0
-        self.w = 1024
-        self.h = 768
+        self.w = 1280
+        self.h = 960
         self.cam = 0
         self.flip = False
         self.real_w = 0
@@ -33,7 +33,6 @@ class VideoThread(QThread):
         cap = cv2.VideoCapture(self.cam) # cv2.CAP_V4L on jetson
         cap.set(cv2.CAP_PROP_FRAME_WIDTH,self.w)
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT,self.h)
-
         cap.set(cv2.CAP_PROP_AUTO_EXPOSURE,1)   # disable auto belichtung
 
 
@@ -103,7 +102,7 @@ class VideoThread(QThread):
                 self.draw_crosshair(rgbImage,w,h)
                 bytesPerLine = ch * w
                 convertToQtFormat = QImage(rgbImage.data, w, h, bytesPerLine, QImage.Format_RGB888)
-                p = convertToQtFormat.scaled(800, 600, Qt.KeepAspectRatio)
+                p = convertToQtFormat #.scaled(1280, 960, Qt.KeepAspectRatio)
                 self.changePixmap.emit(p)
 
     def draw_crosshair(self,frame,w,h): #fadenkreuz, absehen

@@ -19,7 +19,6 @@ class QLabel_alterada(QLabel):
     clicked=pyqtSignal()
     def __init__(self, parent=None):
         QLabel.__init__(self, parent)
-
     def mousePressEvent(self, ev):
         global mouse_click
         mouse_click= [ev.x(),ev.y()]
@@ -57,39 +56,37 @@ class PNPGui():
         self.df_footprints=None
         self.df_feeders=None
 
+        self.mm_faktor_x = 55.2 / 1280.0  # 1024x768 => 1024 = 52mm TODO: add to setting dataframe
+        self.mm_faktor_y = 40.0 / 960.0
 
         # simple Validation on numeric fields
         self.ui.gc_mpos_x.setValidator( QDoubleValidator(0, 230.0 ,8) )
         self.ui.gc_mpos_y.setValidator( QDoubleValidator(0, 280.0 ,8) )
         self.ui.pcb_preview_scale.setValidator( QDoubleValidator(0, 12.0 ,8) )
-        
-      
         self.ui.status_label.setText("-")
         self.ui.status_label.setStyleSheet('color: red')
-        
         self.ui.pannel_update_bt.clicked.connect(self.loadFiducialList)
-
         self.ui.tabs.currentChanged.connect(self.onTabChange)
 
 
         # configure Video Thread
         self.th = VideoThread()
-        self.th2 = VideoThread()
-        self.th.parms = self.getVisionSliderValues()
-        self.th2.parms = self.getVisionSliderValues()
-
+        self.th.parms = self.getVisionSliderValues() # read defaultParms from Sliders
         if(sys.platform == 'linux'):    self.th.cam="/dev/video0"
         else:                           self.th.cam=1
-
         self.th.myVideoFrame = self.ui.videoframe
         self.th.changePixmap.connect(self.th.setImageToGUI)
         self.th.mode=0
         #self.th.w = 1600
         #self.th.h = 1200
         self.th.start()
+        self.ui.videoframe.clicked.connect(self.onVideoMouseEvent) 
     
 
         # configure Video Thread
+        self.th2 = VideoThread()
+        self.th2.parms = self.getVisionSliderValues() # read defaultParms from Sliders
+        self.th2.parms['expose'] = 70
         if(sys.platform == 'linux'):    self.th2.cam="/dev/video1"
         else:                           self.th2.cam=0
         self.th2.myVideoFrame = self.ui.videoframe_2
@@ -97,18 +94,17 @@ class PNPGui():
         self.th2.mode=0
         self.th2.flip=True
         self.th2.start()
-
-        self.worker = PNPWorker()
-        self.worker.gcode = self.gcode
-        self.worker.event.connect(self.on_worker_event)
-
-        self.ui.check_step.clicked.connect(self.onCheckStep)
-
-
-        self.ui.videoframe.clicked.connect(self.onVideoMouseEvent) 
         self.ui.videoframe_2.clicked.connect(self.onVideoMouseEvent2) 
 
+        # add Worker 
+        self.worker = PNPWorker()
+        self.worker.mm_faktor_x = self.mm_faktor_x
+        self.worker.mm_faktor_y = self.mm_faktor_y
+        self.worker.gcode = self.gcode
+        self.worker.event.connect(self.on_worker_event)
+        self.ui.check_step.clicked.connect(self.onCheckStep)
 
+        # callback for Vision slider parms
         self.ui.slider_h_min.valueChanged.connect(self.changeSlider4Vision)
         self.ui.slider_h_max.valueChanged.connect(self.changeSlider4Vision)
         self.ui.slider_s_min.valueChanged.connect(self.changeSlider4Vision)
@@ -120,7 +116,12 @@ class PNPGui():
         self.ui.slider_expose.valueChanged.connect(self.changeSlider4Vision)
         self.ui.slider_a_fac.valueChanged.connect(self.changeSlider4Vision)
         self.ui.slider_kernel.valueChanged.connect(self.changeSlider4Vision)
+        self.ui.slider_canny_thrs1.valueChanged.connect(self.changeSlider4Vision)
+        self.ui.slider_canny_thrs2.valueChanged.connect(self.changeSlider4Vision)
+        self.ui.slider_dilate.valueChanged.connect(self.changeSlider4Vision)
+        self.ui.slider_erode.valueChanged.connect(self.changeSlider4Vision)
         
+
         
     
     
@@ -149,7 +150,6 @@ class PNPGui():
     
     #
     # Helper Functions for Sliders
-
     def getVisionSliderValues(self):
         p= {}
         p['h_min'] = self.ui.slider_h_min.value()
@@ -163,47 +163,38 @@ class PNPGui():
         p['expose'] = self.ui.slider_expose.value()
         p['a_fac'] = self.ui.slider_a_fac.value()
         p['kernel'] = self.ui.slider_kernel.value()
-        p['canny_thrs1'] = 85
-        p['canny_thrs2'] = 255
-        p['dilate_count'] = 8
-        p['erode_count'] = 6
+        p['canny_thrs1'] = self.ui.slider_canny_thrs1.value() 
+        p['canny_thrs2'] = self.ui.slider_canny_thrs2.value() 
+        p['dilate_count'] = self.ui.slider_dilate.value() 
+        p['erode_count'] = self.ui.slider_erode.value() 
         p['gauss_v1'] = 3
         p['gauss_v2'] = 3
         return p
 
     def changeSlider4Vision(self):
-
         parms = self.getVisionSliderValues()
+        print("changeSlider4Vision", parms)
         if( self.gcode.bottom_cam_x == float(self.ui.gc_mpos_x.text()) and
             self.gcode.bottom_cam_y == float(self.ui.gc_mpos_y.text()) ):
             self.th2.parms = parms
         else:
-            self.th.parms = parms
-
-
-        
-
-
-        #self.th.parms['a_fac'] = self.ui.slider_a_fac.value()
-        # self.th2.parms = self.th.parms # For first Tests just use same Settings on both cams
-        print("changeSlider4Vision", parms)
+            self.th.parms = parms   # TODO: query current feeder position and update datasaet
 
 
     def onVideoMouseEvent2(self):
         global mouse_click
-        print("onVideoMouseEvent2",mouse_click)
+        print("onVideoMouseEvent2",mouse_click) # TODO: change angle by mouse click ?
 
 
     def onVideoMouseEvent(self):
         global mouse_click
         print("onVideoMouseEvent",mouse_click)
-        # 1024x768 => 1024 = 52mm
-        mm_faktor = 52.0 / 1024.0
-        x = (512 - mouse_click[0]) * -1
-        y = 384 - mouse_click[1]
-        print("onVideoMouseEvent2",x * mm_faktor ,y * mm_faktor)
-        self.gcode.update_position_relative( x * mm_faktor , y * mm_faktor )  
 
+        # 40 / 960
+        x = (1280/2 - mouse_click[0]) * -1
+        y = 960/2   - mouse_click[1]
+        print("onVideoMouseEvent2",x * self.mm_faktor_x ,y * self.mm_faktor_y)
+        self.gcode.update_position_relative( x * self.mm_faktor_x , y * self.mm_faktor_y )  
 
 
     def onTabChange(self,i):

@@ -20,8 +20,8 @@ class PNPWorker(QThread):
                         {'name': self.CENTER_TO_CLOSE,   'wait': 3.0, 'auto': True},
                         {'name': self.GO_NOZZLE_OFFSET,  'wait': 1.0, 'auto': False},
                         {'name': self.NOZZLE_DOWN,       'wait': 1.0, 'auto': True},
-                        {'name': self.SELENOID_ON,       'wait': 1.0, 'auto': False},
-                        {'name': self.NOZZLE_UP,         'wait': 1.0, 'auto': True},
+                        {'name': self.SELENOID_ON,       'wait': 1.0, 'auto': True},
+                        {'name': self.NOZZLE_UP,         'wait': 1.0, 'auto': False},
                         {'name': self.GO_BOTTOMCAM,      'wait': 1.0, 'auto': True},
                         {'name': self.SET_ROTATION,      'wait': 1.0, 'auto': True},
                         {'name': self.FIX_CENTER,        'wait': 1.0, 'auto': False},
@@ -31,6 +31,9 @@ class PNPWorker(QThread):
                         {'name': self.FINISHED,          'wait': 1.0, 'auto': True} ]
         self.gcode = None
 
+        self.mm_faktor_x = None
+        self.mm_faktor_y = None
+        
         # Runtime Parms
         self.next_step_enable = False
         self.state_idx=0
@@ -76,12 +79,12 @@ class PNPWorker(QThread):
         self.gcode.vacuum1_On()
         self.gcode.vacuum2_On()
 
-        mm_faktor = 52.0 / 1024.0   # mm per 1024 pixel depend on cam position
+        # mm_faktor = 52.0 / 1024.0   # mm per 1024 pixel depend on cam position
         x = (self.videoThreadTop.real_w / 2 - self.videoThreadTop.min_obj_x) * -1
         y = self.videoThreadTop.real_h / 2 - self.videoThreadTop.min_obj_y
 
-        x_relativ_mm =  x * mm_faktor
-        y_relativ_mm =  y * mm_faktor
+        x_relativ_mm =  x * self.mm_faktor_x
+        y_relativ_mm =  y * self.mm_faktor_y
 
 
         print("CENTER_TO_CLOSE",x_relativ_mm ,y_relativ_mm, self.videoThreadTop.real_w,self.videoThreadTop.real_h)
