@@ -74,9 +74,9 @@ class PNPGui():
         self.th.parms = self.getVisionSliderValues() # read defaultParms from Sliders
         if(sys.platform == 'linux'):    self.th.cam="/dev/video0"
         else:                           self.th.cam=1
-        self.th.myVideoFrame = self.ui.videoframe
-        self.th.changePixmap.connect(self.th.setImageToGUI)
+        self.th.changePixmap.connect(self.setImageToGUICamTop)
         self.th.mode=0
+        self.th.crosshair_color = (0,0,255)
         #self.th.w = 1600
         #self.th.h = 1200
         self.th.start()
@@ -89,9 +89,9 @@ class PNPGui():
         self.th2.parms['expose'] = 70
         if(sys.platform == 'linux'):    self.th2.cam="/dev/video1"
         else:                           self.th2.cam=0
-        self.th2.myVideoFrame = self.ui.videoframe_2
-        self.th2.changePixmap.connect(self.th2.setImageToGUI)
+        self.th2.changePixmap.connect(self.setImageToGUICamBottom)
         self.th2.mode=0
+        self.th2.crosshair_color = (255,0,0)
         self.th2.flip=True
         self.th2.start()
         self.ui.videoframe_2.clicked.connect(self.onVideoMouseEvent2) 
@@ -123,8 +123,10 @@ class PNPGui():
         
 
         
-    
-    
+    def setImageToGUICamTop(self, image):
+        self.ui.videoframe_2.setPixmap(QPixmap.fromImage(image)) # TODO: check for Thread bug
+    def setImageToGUICamBottom(self, image):
+        self.ui.videoframe.setPixmap(QPixmap.fromImage(image)) # TODO: check for Thread bug   
     #
     # Handling worker Jobs allow Steps if need interacting
     #
@@ -150,6 +152,27 @@ class PNPGui():
     
     #
     # Helper Functions for Sliders
+    def setVisionSliderValues(self,p):
+        self.ui.slider_h_min.setValue(p['h_min'])
+        self.ui.slider_h_max.setValue(p['h_max'])
+        self.ui.slider_s_min.setValue(p['s_min'])
+        self.ui.slider_s_max.setValue(p['s_max'])
+        self.ui.slider_v_min.setValue(p['v_min'])
+        self.ui.slider_v_max.setValue(p['v_max'])
+        self.ui.slider_a_min.setValue(p['a_min'])
+        self.ui.slider_a_max.setValue(p['a_max'])
+        self.ui.slider_expose.setValue(p['expose'])
+        self.ui.slider_a_fac.setValue(p['a_fac'])
+        self.ui.slider_kernel.setValue(p['kernel'])
+        self.ui.slider_canny_thrs1.setValue(p['canny_thrs1']) 
+        self.ui.slider_canny_thrs2.setValue(p['canny_thrs2']) 
+        self.ui.slider_dilate.setValue(p['dilate_count']) 
+        self.ui.slider_erode.setValue(p['erode_count']) 
+        #p['gauss_v1'] = 3
+        #p['gauss_v2'] = 3
+        return p
+
+
     def getVisionSliderValues(self):
         p= {}
         p['h_min'] = self.ui.slider_h_min.value()
@@ -199,9 +222,9 @@ class PNPGui():
 
     def onTabChange(self,i):
         print("onTabChange TODO refresh Data on this event: ",i)
-        self.th.mode=i
-        self.th2.mode=i
-        if(i==3): self.setFeederTable()
+        #self.th.mode=i
+        #self.th2.mode=i
+        #if(i==3): self.setFeederTable()
 
     #
     #
