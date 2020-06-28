@@ -59,6 +59,8 @@ class PNPGui():
         self.mm_faktor_x = 55.2 / 1280.0  # 1024x768 => 1024 = 52mm TODO: add to setting dataframe
         self.mm_faktor_y = 40.0 / 960.0
 
+        self.currentTab=0
+
         # simple Validation on numeric fields
         self.ui.gc_mpos_x.setValidator( QDoubleValidator(0, 230.0 ,8) )
         self.ui.gc_mpos_y.setValidator( QDoubleValidator(0, 280.0 ,8) )
@@ -68,6 +70,10 @@ class PNPGui():
         self.ui.pannel_update_bt.clicked.connect(self.loadFiducialList)
         self.ui.tabs.currentChanged.connect(self.onTabChange)
 
+        # init default Vision Settings
+        self.videoParms1 = self.getVisionSliderValues()
+        self.videoParms2 = self.getVisionSliderValues()
+        self.videoParms2['expose'] = 70
 
         # configure Video Thread
         self.th = VideoThread()
@@ -79,8 +85,9 @@ class PNPGui():
         self.th.crosshair_color = (0,0,255)
         #self.th.w = 1600
         #self.th.h = 1200
-        self.th.start()
         self.ui.videoframe.clicked.connect(self.onVideoMouseEvent) 
+        self.th.openVideo()
+        self.th.start()
     
 
         # configure Video Thread
@@ -93,8 +100,9 @@ class PNPGui():
         self.th2.mode=0
         self.th2.crosshair_color = (255,0,0)
         self.th2.flip=True
-        self.th2.start()
         self.ui.videoframe_2.clicked.connect(self.onVideoMouseEvent2) 
+        self.th2.openVideo()
+        #self.th2.start()
 
         # add Worker 
         self.worker = PNPWorker()
@@ -121,12 +129,26 @@ class PNPGui():
         self.ui.slider_dilate.valueChanged.connect(self.changeSlider4Vision)
         self.ui.slider_erode.valueChanged.connect(self.changeSlider4Vision)
         
+        self.ui.check_toogle_cam.clicked.connect(self.on_check_toogle_cam)
+        
 
         
     def setImageToGUICamTop(self, image):
-        self.ui.videoframe_2.setPixmap(QPixmap.fromImage(image)) # TODO: check for Thread bug
+        self.ui.videoframe.setPixmap(QPixmap.fromImage(image)) # TODO: check for Thread bug
+        self.th2.parms = self.videoParms2
+        self.th2.mode=self.currentTab
+        self.th2.start()
     def setImageToGUICamBottom(self, image):
-        self.ui.videoframe.setPixmap(QPixmap.fromImage(image)) # TODO: check for Thread bug   
+        self.ui.videoframe_2.setPixmap(QPixmap.fromImage(image)) # TODO: check for Thread bug   
+        self.th.parms = self.videoParms1
+        self.th.mode  = self.currentTab
+        self.worker.videoThreadTop = obj({  'min_obj_x'     : self.th.min_obj_x,
+                                            'min_obj_y'     : self.th.min_obj_y,
+                                            'min_obj_angel' : self.th.min_obj_angel,
+                                            'real_w'        : self.th.real_w,
+                                            'real_h'        : self.th.real_h})
+        self.th.start()
+
     #
     # Handling worker Jobs allow Steps if need interacting
     #
@@ -170,7 +192,6 @@ class PNPGui():
         self.ui.slider_erode.setValue(p['erode_count']) 
         #p['gauss_v1'] = 3
         #p['gauss_v2'] = 3
-        return p
 
 
     def getVisionSliderValues(self):
@@ -197,11 +218,24 @@ class PNPGui():
     def changeSlider4Vision(self):
         parms = self.getVisionSliderValues()
         print("changeSlider4Vision", parms)
-        if( self.gcode.bottom_cam_x == float(self.ui.gc_mpos_x.text()) and
-            self.gcode.bottom_cam_y == float(self.ui.gc_mpos_y.text()) ):
-            self.th2.parms = parms
+        if(self.ui.check_toogle_cam.checkState()):
+            self.videoParms1 = parms
         else:
-            self.th.parms = parms   # TODO: query current feeder position and update datasaet
+            self.videoParms2 = parms
+
+        #if( self.gcode.bottom_cam_x == float(self.ui.gc_mpos_x.text()) and
+        #    self.gcode.bottom_cam_y == float(self.ui.gc_mpos_y.text()) ):
+        #    self.videoParms2 = parms
+        #else:
+        #    self.videoParms1 = parms   # TODO: query current feeder position and update datasaet
+    def on_check_toogle_cam(self):
+        print("on_check_toogle_cam")
+        if(self.ui.check_toogle_cam.checkState()):
+            self.setVisionSliderValues(self.videoParms1.copy())
+        else:
+            self.setVisionSliderValues(self.videoParms2.copy())
+
+
 
 
     def onVideoMouseEvent2(self):
@@ -222,9 +256,8 @@ class PNPGui():
 
     def onTabChange(self,i):
         print("onTabChange TODO refresh Data on this event: ",i)
-        #self.th.mode=i
-        #self.th2.mode=i
-        #if(i==3): self.setFeederTable()
+        self.currentTab = i
+        if(i==3): self.setFeederTable()
 
     #
     #
@@ -372,8 +405,8 @@ class PNPGui():
         print("onSimButtonPartlist::Footprint",self.worker.footprint)
         print("onSimButtonPartlist::feeder",self.worker.feeder)
         self.worker.position_part_on_pcb = self.getMotorPositionForPart(row)
-        self.worker.videoThreadTop = self.th
-        self.worker.videoThreadBottom = self.th2
+        #self.worker.videoThreadTop = self.th        # TODO: check ThreatSave 
+        #self.worker.videoThreadBottom = self.th2    # TODO: check ThreatSave
         self.worker.state_idx=0
         self.worker.start()
 
@@ -539,3 +572,4 @@ class PNPGui():
         convertToQtFormat = QImage(imageBlank.data, w, h, bytesPerLine, QImage.Format_RGB888)
         p = convertToQtFormat.scaled(1024, 768, Qt.KeepAspectRatio)
         self.ui.pannelpreview.setPixmap(QPixmap.fromImage(p))
+

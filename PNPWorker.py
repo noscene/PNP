@@ -40,8 +40,8 @@ class PNPWorker(QThread):
         self.feeder = None
         self.footprint = None
         self.position_part_on_pcb = None    # [0]:x  [1]:y  [2]:angle 
-        self.videoThreadTop = None
-        self.videoThreadBottom = None
+        self.videoThreadTop = {}
+        #self.videoThreadBottom = None
         self.angel_from_pickup = 0
 
 
@@ -52,10 +52,10 @@ class PNPWorker(QThread):
             self.next_step_enable = False                   # prepair for waiting
             self.event.emit(self.state_idx)                 # call UI
             while not self.next_step_enable:                # Wait for enable Step
-                time.sleep(0.1)
+                self.msleep(100)
 
             time_to_wait = current_state['wait']
-            time.sleep(time_to_wait)                        # wait
+            self.msleep(int(time_to_wait*1000))                        # wait
             # print(self.state_idx,"UI Finished")
             current_state['name']()                         # call function
             if( self.state_idx < len(self.states)-1 ):

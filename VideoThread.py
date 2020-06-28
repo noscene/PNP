@@ -25,14 +25,16 @@ class VideoThread(QThread):
         self.flip = False
         self.real_w = 0
         self.real_h = 0
+        self.cap = None
+
+
+    def openVideo(self):
+        self.cap = cv2.VideoCapture(self.cam) # cv2.CAP_V4L on jetson
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH,self.w)
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT,self.h)
+        self.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE,1)   # disable auto belichtung
 
     def run(self):
-
-        cap = cv2.VideoCapture(self.cam) # cv2.CAP_V4L on jetson
-        cap.set(cv2.CAP_PROP_FRAME_WIDTH,self.w)
-        cap.set(cv2.CAP_PROP_FRAME_HEIGHT,self.h)
-        cap.set(cv2.CAP_PROP_AUTO_EXPOSURE,1)   # disable auto belichtung
-
 
         # disable auto exposure
         # sven@sven-desktop:~$ v4l2-ctl -d /dev/video1  --set-ctrl exposure_auto=1
@@ -73,35 +75,35 @@ class VideoThread(QThread):
 
 
 
+        self.cap.set(cv2.CAP_PROP_EXPOSURE,self.parms["expose"])
 
-        while True:
-            cap.set(cv2.CAP_PROP_EXPOSURE,self.parms["expose"])
+        #while True:
 
-            self.min_obj_distance = 9999
-            ret, frame = cap.read()
-                
-            if ret:
-                # https://stackoverflow.com/a/55468544/6622587
-                
-                if self.flip:
-                    frame = cv2.flip(frame, 0)
-                
-                rgbImage2=self.searchForRectangles(frame)
+        self.min_obj_distance = 9999
+        ret, frame = self.cap.read()
+            
+        if ret:
+            # https://stackoverflow.com/a/55468544/6622587
+            
+            if self.flip:
+                frame = cv2.flip(frame, 0)
+            
+            rgbImage2=self.searchForRectangles(frame)
 
-                rgbImage = cv2.cvtColor(rgbImage2, cv2.COLOR_BGR2RGB)
-                h, w, ch = rgbImage.shape
+            rgbImage = cv2.cvtColor(rgbImage2, cv2.COLOR_BGR2RGB)
+            h, w, ch = rgbImage.shape
 
 
-                #print("rgbImage",w,h,self.flip)
+            #print("rgbImage",w,h,self.flip)
 
-                self.real_w = w
-                self.real_h = h
+            self.real_w = w
+            self.real_h = h
 
-                self.draw_crosshair(rgbImage,w,h)
-                bytesPerLine = ch * w
-                convertToQtFormat = QImage(rgbImage.data, w, h, bytesPerLine, QImage.Format_RGB888)
-                p = convertToQtFormat #.scaled(1280, 960, Qt.KeepAspectRatio)
-                self.changePixmap.emit(p)
+            self.draw_crosshair(rgbImage,w,h)
+            bytesPerLine = ch * w
+            convertToQtFormat = QImage(rgbImage.data, w, h, bytesPerLine, QImage.Format_RGB888)
+            p = convertToQtFormat.scaled(1280, 960, Qt.KeepAspectRatio)
+            self.changePixmap.emit(p)
 
     def draw_crosshair(self,frame,w,h): #fadenkreuz, absehen
         cv2.line(img=frame, pt1=(0, int(h/2)), pt2=(w, int(h/2)), color=self.crosshair_color , thickness = 1, lineType = 8, shift = 0)

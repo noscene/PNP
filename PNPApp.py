@@ -7,6 +7,9 @@ from PNPGCode import *
 from PNPGui import *
 
 def main():
+    #faulthandler.enable()
+    # python3 -q -X faulthandler PNPApp.py
+
     application = QtWidgets.QApplication(sys.argv)
 
     ui = loadUi('pnp.ui')

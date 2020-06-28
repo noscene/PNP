@@ -12,7 +12,14 @@ base = 720     # this is screen height, need to flip cords
 #        self.x_mm = x 
 #        self.y_mm = y 
 
-
+class obj(object):
+    def __init__(self, d):
+        for a, b in d.items():
+            if isinstance(b, (list, tuple)):
+               setattr(self, a, [obj(x) if isinstance(x, dict) else x for x in b])
+            else:
+               setattr(self, a, obj(b) if isinstance(b, dict) else b)
+               
 class Point():
     def __init__(self,x,y):
         self.x = float(x)
