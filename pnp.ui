@@ -495,7 +495,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>4</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tabpannel">
      <attribute name="title">
@@ -675,6 +675,12 @@
         <width>51</width>
         <height>21</height>
        </rect>
+      </property>
+      <property name="toolTip">
+       <string notr="true" comment="Preview" extracomment="comment on Tooltip"/>
+      </property>
+      <property name="toolTipDuration">
+       <number>2</number>
       </property>
       <property name="text">
        <string>3</string>
@@ -1316,6 +1322,9 @@
       <property name="text">
        <string>TopCam / Bottom Cam</string>
       </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
      </widget>
     </widget>
    </widget>
@@ -1327,6 +1336,9 @@
       <width>1280</width>
       <height>960</height>
      </rect>
+    </property>
+    <property name="toolTipDuration">
+     <number>1</number>
     </property>
     <property name="text">
      <string>.......MY VIDEO</string>
@@ -1358,9 +1370,9 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>979</y>
-      <width>800</width>
-      <height>260</height>
+      <y>758</y>
+      <width>1280</width>
+      <height>481</height>
      </rect>
     </property>
     <property name="text">

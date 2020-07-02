@@ -73,7 +73,8 @@ class PNPGui():
         # init default Vision Settings
         self.videoParms1 = self.getVisionSliderValues()
         self.videoParms2 = self.getVisionSliderValues()
-        self.videoParms2['expose'] = 70
+        self.videoParms2['expose'] = 16
+        self.videoParms1['expose'] = 70
 
         # configure Video Thread
         self.th = VideoThread()
@@ -98,6 +99,8 @@ class PNPGui():
         else:                           self.th2.cam=0
         self.th2.changePixmap.connect(self.setImageToGUICamBottom)
         self.th2.mode=0
+        self.th2.w = 800
+        self.th2.h = 600
         self.th2.crosshair_color = (255,0,0)
         self.th2.flip=True
         self.ui.videoframe_2.clicked.connect(self.onVideoMouseEvent2) 
@@ -240,8 +243,17 @@ class PNPGui():
 
     def onVideoMouseEvent2(self):
         global mouse_click
-        print("onVideoMouseEvent2",mouse_click) # TODO: change angle by mouse click ?
-
+        xm = (1280/2 - mouse_click[0]) 
+        ym = 480/2 - mouse_click[1]
+        if(xm==0): xm=1 # avoid div/0
+        if(ym==0): ym=1 # avoid div/0
+        xmabs=abs(xm)
+        alpha = math.atan(ym/xmabs) - (np.pi * 0.5)
+        alpha*= 180/np.pi
+        if(xm>0):
+            alpha*=-1
+        print("onVideoMouseEvent2",xm,ym,alpha) # TODO: change angle by mouse click ?
+        self.gcode.update_rotation_relative(alpha)
 
     def onVideoMouseEvent(self):
         global mouse_click

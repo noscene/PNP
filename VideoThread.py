@@ -187,7 +187,7 @@ class VideoThread(QThread):
         imgResult   = cv2.bitwise_and(frame0,frame0,mask=mask)
         gray2       = cv2.cvtColor(imgResult, cv2.COLOR_BGR2GRAY) 
         gray        = cv2.GaussianBlur(gray2,(parms['gauss_v1'],parms['gauss_v2']),cv2.BORDER_DEFAULT)
-        edged       = cv2.Canny(gray, parms['canny_thrs1'], parms['canny_thrs2']) 
+        edged       = cv2.Canny(gray, parms['canny_thrs1'], parms['canny_thrs2'],7) 
         imgDilation = cv2.dilate(edged, kernel, iterations = parms['dilate_count'])    
         imgEroded   = cv2.erode(imgDilation, kernel, iterations = parms['erode_count'])
 
