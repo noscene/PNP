@@ -10,9 +10,9 @@ class QLabel_alterada(QLabel):
     clicked=pyqtSignal()
     def __init__(self, parent=None):
         QLabel.__init__(self, parent)
+        self.mouse_click = [0,0]
     def mousePressEvent(self, ev):
-        global mouse_click
-        mouse_click= [ev.x(),ev.y()]
+        self.mouse_click= [ev.x(),ev.y()]
         print(ev.x(),ev.y())
         self.clicked.emit()
 

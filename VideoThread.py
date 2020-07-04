@@ -32,7 +32,7 @@ class VideoThread(QThread):
         self.cap = cv2.VideoCapture(self.cam) # cv2.CAP_V4L on jetson
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH,self.w)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT,self.h)
-        self.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE,1)   # disable auto belichtung
+        self.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0 )   # disable auto belichtung
 
     def run(self):
 

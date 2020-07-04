@@ -3,7 +3,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 import json
-
+import sys
 import cv2
 import numpy as np
 import pandas as pd
@@ -12,8 +12,6 @@ from VideoThread import *
 from PNPHelpers import *
 from PNPWorker import *
 from QTHelpers import *
-
-mouse_click = []
 
 
 class PNPGui():
@@ -46,8 +44,8 @@ class PNPGui():
         # init default Vision Settings
         self.videoParms1 = self.getVisionSliderValues()
         self.videoParms2 = self.getVisionSliderValues()
-        self.videoParms2['expose'] = 16
-        self.videoParms1['expose'] = 70
+        #self.videoParms2['expose'] = 16
+        #self.videoParms1['expose'] = 70
 
         # configure Video Thread
         self.th = VideoThread()
@@ -61,13 +59,12 @@ class PNPGui():
         #self.th.h = 1200
         self.ui.videoframe.clicked.connect(self.onVideoMouseEvent) 
         self.th.openVideo()
-        self.th.start()
     
 
         # configure Video Thread
         self.th2 = VideoThread()
         self.th2.parms = self.getVisionSliderValues() # read defaultParms from Sliders
-        self.th2.parms['expose'] = 70
+        # self.th2.parms['expose'] = 70
         if(sys.platform == 'linux'):    self.th2.cam="/dev/video1"
         else:                           self.th2.cam=0
         self.th2.changePixmap.connect(self.setImageToGUICamBottom)
@@ -79,6 +76,10 @@ class PNPGui():
         self.ui.videoframe_2.clicked.connect(self.onVideoMouseEvent2) 
         self.th2.openVideo()
         #self.th2.start()
+
+
+        self.th.start()
+
 
         # add Worker 
         self.worker = PNPWorker()
@@ -218,11 +219,6 @@ class PNPGui():
         else:
             self.videoParms2 = parms
 
-        #if( self.gcode.bottom_cam_x == float(self.ui.gc_mpos_x.text()) and
-        #    self.gcode.bottom_cam_y == float(self.ui.gc_mpos_y.text()) ):
-        #    self.videoParms2 = parms
-        #else:
-        #    self.videoParms1 = parms   # TODO: query current feeder position and update datasaet
     def on_check_toogle_cam(self):
         print("on_check_toogle_cam")
         if(self.ui.check_toogle_cam.checkState()):
@@ -231,10 +227,8 @@ class PNPGui():
             self.setVisionSliderValues(self.videoParms2.copy())
 
 
-
-
     def onVideoMouseEvent2(self):
-        global mouse_click
+        mouse_click = self.ui.videoframe_2.mouse_click
         xm = (1280/2 - mouse_click[0]) 
         ym = 480/2 - mouse_click[1]
         if(xm==0): xm=1 # avoid div/0
@@ -248,7 +242,7 @@ class PNPGui():
         self.gcode.update_rotation_relative(alpha)
 
     def onVideoMouseEvent(self):
-        global mouse_click
+        mouse_click = self.ui.videoframe.mouse_click
         print("onVideoMouseEvent",mouse_click)
 
         # 40 / 960
@@ -273,7 +267,7 @@ class PNPGui():
         except Exception: pass
         df = self.df_footprints
         self.footprint_list_headers = ['Feeder','Footprint','X', 'Y', 'Z','Nozzle','GoFeeder']
-        grid.setColumnCount(7)
+        grid.setColumnCount(6)
         grid.setHorizontalHeaderLabels(self.footprint_list_headers)
         grid.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
         grid.setRowCount(len(df.index))
@@ -284,7 +278,7 @@ class PNPGui():
             grid.setItem(index,3,QtWidgets.QTableWidgetItem(str(row['Y']))) 
             grid.setItem(index,4,QtWidgets.QTableWidgetItem(str(row['Z']))) 
             grid.setItem(index,5,QtWidgets.QTableWidgetItem(str(row['Nozzle']))) 
-            grid.setCellWidget(index, 6, ButtonBlock("go",row, self.onGoButtonFootprint))
+            #grid.setCellWidget(index, 6, ButtonBlock("go",row, self.onGoButtonFootprint))
         grid.itemChanged.connect(self.changeFootprintItemn)
 
     def changeFootprintItemn(self,item):
@@ -296,8 +290,8 @@ class PNPGui():
             self.df_footprints.at[row, col_name] = item.text()
         except:
             print ("changeFootprintItemn ERROR invalid value",row,col,col_name,item.text())
-    def onGoButtonFootprint(self,item):
-        print("onGoButtonFootprint",item)
+    #def onGoButtonFootprint(self,item):
+    #    print("onGoButtonFootprint",item)
 
     #
     #
@@ -340,7 +334,11 @@ class PNPGui():
         self.df_feeders.to_csv('feeder.csv', sep=";", header=True,index=False, columns=["Tray","NR","X","Y","W","H","Z","Footprint","Value","Vision"])
 
     def onGoButtonFeeder(self,item):
-        print("onGoButtonFeeder",item.X + item.W / 2.0 , item.Y + item.H / 2.0)
+        print("onGoButtonFeeder",item.Vision,item.X + item.W / 2.0 , item.Y + item.H / 2.0)
+        self.ui.save_vision_name.setText(item.Vision)   
+        if item.Vision in self.visionData:
+            self.videoParms1 = self.visionData[str(item.Vision)]['T']
+            self.videoParms2 = self.visionData[str(item.Vision)]['B']    
         self.gcode.driveto(( item.X + item.W / 2.0  , item.Y + item.H / 2.0 )) 
     #
     #
@@ -403,14 +401,23 @@ class PNPGui():
         print("onSimButtonPartlist", index, row)
         self.ui.parts_table.item(index, 0).setBackground(Qt.green)  
 
-        self.ui.status_label.setText("PLACE " + row.PART + " " + row.Value + " " + row.Footprint)
         self.worker.footprint = self.df_footprints.query( 'Footprint == "'+str(row['Footprint'])+'" and X > 0 ' ).iloc[0]
         self.worker.feeder    = self.df_feeders.query( 'Footprint == "'+str(row['Footprint'])+'" and Value =="'+str(row['Value'])+'" ').iloc[0]
         print("onSimButtonPartlist::Footprint",self.worker.footprint)
         print("onSimButtonPartlist::feeder",self.worker.feeder)
         self.worker.position_part_on_pcb = self.getMotorPositionForPart(row)
-        #self.worker.videoThreadTop = self.th        # TODO: check ThreatSave 
-        #self.worker.videoThreadBottom = self.th2    # TODO: check ThreatSave
+
+        # Load Vision
+        visionSetting = self.worker.feeder['Vision']
+        print("onSimButtonPartlist::Vision",visionSetting)
+        self.ui.save_vision_name.setText(visionSetting)   
+        if visionSetting in self.visionData:
+            self.videoParms1 = self.visionData[str(visionSetting)]['T']
+            self.videoParms2 = self.visionData[str(visionSetting)]['B']   
+
+
+        self.ui.status_label.setText("PLACE " + row.PART + " " + row.Value + " " + row.Footprint + " Vision: " + visionSetting)
+
         self.worker.state_idx=0
         self.worker.start()
 
@@ -514,16 +521,13 @@ class PNPGui():
 
 
 
-
-
-
     #
     #
     #
     #
     def loadVisionList(self):
         try:
-            with open('vision.json') as f:
+            with open('vision_'+sys.platform+'.json') as f:
                 self.visionData = json.load(f)
         except Exception: pass
         print(self.visionData)
@@ -540,22 +544,24 @@ class PNPGui():
         for key  in self.visionData:
             grid.setItem(i,0,QtWidgets.QTableWidgetItem(str(key))) 
             grid.setItem(i,1,QtWidgets.QTableWidgetItem(str(self.visionData[key]))) 
-            grid.setCellWidget(i, 2, ButtonBlock("Load",(i,self.visionData[key]), self.onLoadVision))
+            grid.setCellWidget(i, 2, ButtonBlock("Load",(key,self.visionData[key],i), self.onLoadVision))
             i+=1
         #grid.itemChanged.connect(self.changeFiducialItem)
 
     def save_vision_as(self):
         name = self.ui.save_vision_name.text()
         self.visionData[name] = {'T':self.videoParms1,'B':self.videoParms2}
-        with open('vision.json', 'w') as json_file:
+        with open('vision_'+sys.platform+'.json', 'w') as json_file:
             json.dump(self.visionData, json_file,  indent = 4, sort_keys=True)
 
         self.loadVisionList()
 
     def onLoadVision(self,callbackData):
-        index = callbackData[0]
+        key = callbackData[0]
         row = callbackData[1]        
-        print("onLoadVision need implement",index,row)
+        index = callbackData[2]     
+        self.ui.save_vision_name.setText(key)   
+        print("onLoadVision",key,index,row)
         self.videoParms1 = row['T']
         self.videoParms2 = row['B']
         self.on_check_toogle_cam()

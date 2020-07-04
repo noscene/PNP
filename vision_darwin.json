@@ -1,5 +1,5 @@
 {
-    "0403": {
+    "0402": {
         "B": {
             "a_fac": 8,
             "a_max": 800,
@@ -61,8 +61,8 @@
         },
         "T": {
             "a_fac": 8,
-            "a_max": 800,
-            "a_min": 40,
+            "a_max": 180,
+            "a_min": 70,
             "canny_thrs1": 204,
             "canny_thrs2": 33,
             "dilate_count": 8,
@@ -79,7 +79,47 @@
             "v_min": 10
         }
     },
-    "maus": {
+    "QFN": {
+        "B": {
+            "a_fac": 8,
+            "a_max": 800,
+            "a_min": 40,
+            "canny_thrs1": 204,
+            "canny_thrs2": 33,
+            "dilate_count": 8,
+            "erode_count": 6,
+            "expose": 16,
+            "gauss_v1": 3,
+            "gauss_v2": 3,
+            "h_max": 255,
+            "h_min": 0,
+            "kernel": 5,
+            "s_max": 255,
+            "s_min": 0,
+            "v_max": 100,
+            "v_min": 10
+        },
+        "T": {
+            "a_fac": 8,
+            "a_max": 717,
+            "a_min": 576,
+            "canny_thrs1": 204,
+            "canny_thrs2": 33,
+            "dilate_count": 8,
+            "erode_count": 6,
+            "expose": 840,
+            "gauss_v1": 3,
+            "gauss_v2": 3,
+            "h_max": 255,
+            "h_min": 0,
+            "kernel": 5,
+            "s_max": 255,
+            "s_min": 0,
+            "v_max": 100,
+            "v_min": 10
+        }
+    },
+    "qfn32": {
         "B": {
             "a_fac": 8,
             "a_max": 800,
@@ -102,12 +142,12 @@
         "T": {
             "a_fac": 8,
             "a_max": 800,
-            "a_min": 31,
+            "a_min": 40,
             "canny_thrs1": 204,
             "canny_thrs2": 33,
             "dilate_count": 8,
             "erode_count": 6,
-            "expose": 840,
+            "expose": 70,
             "gauss_v1": 3,
             "gauss_v2": 3,
             "h_max": 255,
