@@ -11,41 +11,9 @@ import pandas as pd
 from VideoThread import *
 from PNPHelpers import *
 from PNPWorker import *
+from QTHelpers import *
 
 mouse_click = []
-
-# https://stackoverflow.com/questions/45575626/make-qlabel-clickable-using-pyqt5
-class QLabel_alterada(QLabel):
-    clicked=pyqtSignal()
-    def __init__(self, parent=None):
-        QLabel.__init__(self, parent)
-    def mousePressEvent(self, ev):
-        global mouse_click
-        mouse_click= [ev.x(),ev.y()]
-        print(ev.x(),ev.y())
-        self.clicked.emit()
-
-
-# single Object with CallBack
-class ButtonBlock(QtWidgets.QWidget):
-    def __init__(self, name='tach',row=None,action=None):
-        super(QtWidgets.QWidget, self).__init__()
-        self.row = row
-        self.action = action
-        bt = QtWidgets.QPushButton()
-        bt.setText(name)
-        bl=QtWidgets.QHBoxLayout(self)
-        bl.addWidget(bt)
-        bl.setAlignment(Qt.AlignCenter);
-        bl.setContentsMargins(0, 0, 0, 0);
-        self.setLayout(bl)
-        bt.clicked.connect(self.ButtonClicked)
-        self.name=name
-    def ButtonClicked(self):
-        # print ("ButtonClicked",self.row)
-        self.action(self.row)
-
-
 
 
 class PNPGui():
@@ -69,6 +37,11 @@ class PNPGui():
         self.ui.status_label.setStyleSheet('color: red')
         self.ui.pannel_update_bt.clicked.connect(self.loadFiducialList)
         self.ui.tabs.currentChanged.connect(self.onTabChange)
+
+
+
+        self.visionData={}
+        self.ui.save_vision_as.clicked.connect(self.save_vision_as)
 
         # init default Vision Settings
         self.videoParms1 = self.getVisionSliderValues()
@@ -131,7 +104,6 @@ class PNPGui():
         self.ui.slider_canny_thrs2.valueChanged.connect(self.changeSlider4Vision)
         self.ui.slider_dilate.valueChanged.connect(self.changeSlider4Vision)
         self.ui.slider_erode.valueChanged.connect(self.changeSlider4Vision)
-        
         self.ui.check_toogle_cam.clicked.connect(self.on_check_toogle_cam)
         
 
@@ -174,7 +146,22 @@ class PNPGui():
     
     
     
-    
+    def setVisionSliderLabelValues(self,p):
+        self.ui.label_h_min.setText("h_min: " + str(p['h_min']))
+        self.ui.label_s_min.setText("s_min: " + str(p['s_min']))
+        self.ui.label_v_min.setText("v_min: " + str(p['v_min']))
+        self.ui.label_h_max.setText("h_max: " + str(p['h_max']))
+        self.ui.label_s_max.setText("s_max: " + str(p['s_max']))
+        self.ui.label_v_max.setText("v_max: " + str(p['v_max']))
+        self.ui.label_a_min.setText("a_min: " + str(p['a_min']))
+        self.ui.label_a_max.setText("a_max: " + str(p['a_max']))
+        self.ui.label_expose.setText("expose: " + str(p['expose']))
+        self.ui.label_a_fac.setText("a_fac: " + str(p['a_fac']))
+        self.ui.label_kernel.setText("kernel: " + str(p['kernel']))
+        self.ui.label_dilate.setText("dilate_count: " + str(p['dilate_count']))
+        self.ui.label_erode.setText("erode_count: " + str(p['erode_count']))
+        self.ui.label_canny_thrs1.setText("canny_thrs1: " + str(p['canny_thrs1']))
+        self.ui.label_canny_thrs2.setText("canny_thrs2: " + str(p['canny_thrs2']))
     #
     # Helper Functions for Sliders
     def setVisionSliderValues(self,p):
@@ -216,7 +203,12 @@ class PNPGui():
         p['erode_count'] = self.ui.slider_erode.value() 
         p['gauss_v1'] = 3
         p['gauss_v2'] = 3
+        self.setVisionSliderLabelValues(p)
         return p
+
+
+
+
 
     def changeSlider4Vision(self):
         parms = self.getVisionSliderValues()
@@ -250,7 +242,7 @@ class PNPGui():
         xmabs=abs(xm)
         alpha = math.atan(ym/xmabs) - (np.pi * 0.5)
         alpha*= 180/np.pi
-        if(xm>0):
+        if(xm<0):
             alpha*=-1
         print("onVideoMouseEvent2",xm,ym,alpha) # TODO: change angle by mouse click ?
         self.gcode.update_rotation_relative(alpha)
@@ -521,6 +513,52 @@ class PNPGui():
 
 
 
+
+
+
+
+    #
+    #
+    #
+    #
+    def loadVisionList(self):
+        try:
+            with open('vision.json') as f:
+                self.visionData = json.load(f)
+        except Exception: pass
+        print(self.visionData)
+        grid = self.ui.visionTable 
+        self.vision_list_headers = ['Name','JSON','Go']
+        try: grid.itemChanged.disconnect() # avoid any msg when redraw
+        except Exception: pass
+        grid.setColumnCount(3)
+        grid.setHorizontalHeaderLabels(self.vision_list_headers)
+        grid.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        # print(self.fiducials)
+        i=0
+        grid.setRowCount(len(self.visionData)) # x*y*2 fiducials
+        for key  in self.visionData:
+            grid.setItem(i,0,QtWidgets.QTableWidgetItem(str(key))) 
+            grid.setItem(i,1,QtWidgets.QTableWidgetItem(str(self.visionData[key]))) 
+            grid.setCellWidget(i, 2, ButtonBlock("Load",(i,self.visionData[key]), self.onLoadVision))
+            i+=1
+        #grid.itemChanged.connect(self.changeFiducialItem)
+
+    def save_vision_as(self):
+        name = self.ui.save_vision_name.text()
+        self.visionData[name] = {'T':self.videoParms1,'B':self.videoParms2}
+        with open('vision.json', 'w') as json_file:
+            json.dump(self.visionData, json_file,  indent = 4, sort_keys=True)
+
+        self.loadVisionList()
+
+    def onLoadVision(self,callbackData):
+        index = callbackData[0]
+        row = callbackData[1]        
+        print("onLoadVision need implement",index,row)
+        self.videoParms1 = row['T']
+        self.videoParms2 = row['B']
+        self.on_check_toogle_cam()
 
     #
     #

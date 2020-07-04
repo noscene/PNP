@@ -49,6 +49,11 @@ def main():
     gui.showPreviewPannel()
 
 
+    gui.loadVisionList()
+
+
+
+
     # show App and start
     ui.show()
     sys.exit(application.exec_())

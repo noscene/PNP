@@ -93,7 +93,6 @@ class VideoThread(QThread):
             rgbImage = cv2.cvtColor(rgbImage2, cv2.COLOR_BGR2RGB)
             h, w, ch = rgbImage.shape
 
-
             #print("rgbImage",w,h,self.flip)
 
             self.real_w = w
@@ -112,6 +111,10 @@ class VideoThread(QThread):
         for x in range(lines):
             cv2.line(img=frame, pt1=(int(w/lines*x), int(h/2-10) ), pt2=(int(w/lines*x), int(h/2+10) ), color=self.crosshair_color , thickness = 1, lineType = 8, shift = 0)
             cv2.line(img=frame, pt1=(int(w/2-10), int(h/lines*x) ), pt2=( int(w/2+10), int(h/lines*x) ), color=self.crosshair_color , thickness = 1, lineType = 8, shift = 0)
+
+        if(self.flip):
+            cv2.circle(img=frame, center=(int(w/2), int(h/2) ), radius=100, color=self.crosshair_color, thickness = 1)
+
         return frame
 
     def stackImages(self,scale,imgArray):
@@ -278,6 +281,7 @@ class VideoThread(QThread):
                                                 [imgContour,    imgHSV2, imgEroded] ) )
             return imgstack
         else: 
+
             return imgContour
 
 
