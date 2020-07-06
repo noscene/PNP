@@ -170,7 +170,18 @@ class VideoThread(QThread):
        y = int( center[1] - height/2 )
        image = image[ y:y+height, x:x+width ]
        return image   
-    
+
+    # https://www.pyimagesearch.com/2015/04/06/zero-parameter-automatic-canny-edge-detection-with-python-and-opencv/
+    def auto_canny(self,image, sigma=0.33, kernel=5):
+        # compute the median of the single channel pixel intensities
+        v = np.median(image)
+        # apply automatic Canny edge detection using the computed median
+        lower = int(max(0, (1.0 - sigma) * v))
+        upper = int(min(255, (1.0 + sigma) * v))
+        edged = cv2.Canny(image, lower, upper,kernel)
+        # return the edged image
+        return edged    
+
     def searchForRectangles(self, frame0):
 
         #use cv2.flip(frame,1) -> spiegelt für BottomCam Später und Overlayzu bauen auf PCB
@@ -180,17 +191,42 @@ class VideoThread(QThread):
         ks = parms['kernel'] 
         kernel = np.ones((ks,ks),np.uint8)
 
+        # https://github.com/platsch/OctoPNP/commit/e52acb1dfb4063e30a14139ca8809530f79459c8
+
+        # https://stackoverflow.com/questions/21324950/how-can-i-select-the-best-set-of-parameters-in-the-canny-edge-detection-algorith 
+        #high_thresh, thresh_im = cv2.threshold(im, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+        #lowThresh = 0.5*high_thresh
+
         imgHSV      = cv2.cvtColor(frame0,cv2.COLOR_BGR2HSV)
         imgHSV2     = cv2.GaussianBlur(imgHSV,(parms['gauss_v1'],parms['gauss_v2']),cv2.BORDER_DEFAULT)
         lower       = np.array([parms['h_min'],parms['s_min'],parms['v_min']])
         upper       = np.array([parms['h_max'],parms['s_max'],parms['v_max']])
         mask        = cv2.inRange(imgHSV2,lower,upper)
-       # mask        = cv2.bitwise_not(mask)
+        #mask        = cv2.bitwise_not(mask)
+
 
         imgResult   = cv2.bitwise_and(frame0,frame0,mask=mask)
         gray2       = cv2.cvtColor(imgResult, cv2.COLOR_BGR2GRAY) 
-        gray        = cv2.GaussianBlur(gray2,(parms['gauss_v1'],parms['gauss_v2']),cv2.BORDER_DEFAULT)
-        edged       = cv2.Canny(gray, parms['canny_thrs1'], parms['canny_thrs2'],7) 
+
+        ret3,th3    = cv2.threshold(gray2,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+        open_mask   = cv2.morphologyEx(th3, cv2.MORPH_OPEN, np.ones((4, 4), np.uint8))
+        gray        = cv2.morphologyEx(open_mask, cv2.MORPH_CLOSE, np.ones((12, 12), np.uint8))
+
+        #gray        = cv2.GaussianBlur(gray2,(parms['gauss_v1'],parms['gauss_v2']),cv2.BORDER_DEFAULT)
+        #edged       = cv2.Canny(gray, parms['canny_thrs1'], parms['canny_thrs2'],7) 
+        edged       = self.auto_canny(gray)
+
+
+
+
+
+
+
+
+
+
+
+
         imgDilation = cv2.dilate(edged, kernel, iterations = parms['dilate_count'])    
         imgEroded   = cv2.erode(imgDilation, kernel, iterations = parms['erode_count'])
 
@@ -278,7 +314,7 @@ class VideoThread(QThread):
             # simg = self.subimage(frame0, center=(512, 384), theta=30, width=512, height=384)
 
             imgstack = self.stackImages(0.3, (  [edged,         frame0,  mask],
-                                                [imgContour,    imgHSV2, imgEroded] ) )
+                                                [imgContour,    gray, imgEroded] ) )
             return imgstack
         else: 
 

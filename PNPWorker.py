@@ -21,7 +21,7 @@ class PNPWorker(QThread):
                         {'name': self.GO_NOZZLE_OFFSET,  'wait': 1.0, 'auto': False},
                         {'name': self.NOZZLE_DOWN,       'wait': 1.0, 'auto': True},
                         {'name': self.SELENOID_ON,       'wait': 1.0, 'auto': True},
-                        {'name': self.NOZZLE_UP,         'wait': 1.0, 'auto': False},
+                        {'name': self.NOZZLE_UP,         'wait': 1.0, 'auto': True},
                         {'name': self.GO_BOTTOMCAM,      'wait': 1.0, 'auto': True},
                         {'name': self.SET_ROTATION,      'wait': 1.0, 'auto': True},
                         {'name': self.FIX_CENTER,        'wait': 1.0, 'auto': False},
@@ -112,10 +112,12 @@ class PNPWorker(QThread):
         print(self.state_idx,"GO_BOTTOMCAM")    
         self.gcode.ledBottom_On()
         self.gcode.driveto((self.gcode.bottom_cam_x,self.gcode.bottom_cam_y)) 
-    def SET_ROTATION(self):         
-        print(self.state_idx,"SET_ROTATION")   
-        self.gcode.update_rotation_relative(self.angel_from_pickup ) 
-    def FIX_CENTER(self):           
+    def SET_ROTATION(self):      
+        angle_from_pcb = self.position_part_on_pcb[2]    # Todo: need to check should be arround -90grad
+        angle_from_pcb = -90.0
+        print(self.state_idx,"SET_ROTATION", self.angel_from_pickup, angle_from_pcb)   
+        self.gcode.update_rotation_relative(self.angel_from_pickup * -1 + angle_from_pcb ) 
+    def FIX_CENTER(self):
         print(self.state_idx,"FIX_CENTER")   
         #self.gcode.driveto((100,100))
     def GO_PCB_PLACE(self):         
