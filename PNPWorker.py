@@ -18,14 +18,16 @@ class PNPWorker(QThread):
                         {'name': self.MAKE_PCB_FOTO,     'wait': 1.0, 'auto': True},
                         {'name': self.GO_FEEDER,         'wait': 1.0, 'auto': False},
                         {'name': self.CENTER_TO_CLOSE,   'wait': 3.0, 'auto': True},
+                        {'name': self.CENTER_TO_CLOSE2,  'wait': 2.0, 'auto': True},
                         {'name': self.GO_NOZZLE_OFFSET,  'wait': 1.0, 'auto': False},
-                        {'name': self.NOZZLE_DOWN,       'wait': 1.0, 'auto': True},
-                        {'name': self.SELENOID_ON,       'wait': 1.0, 'auto': True},
-                        {'name': self.NOZZLE_UP,         'wait': 1.0, 'auto': True},
-                        {'name': self.GO_BOTTOMCAM,      'wait': 1.0, 'auto': True},
-                        {'name': self.SET_ROTATION,      'wait': 1.0, 'auto': True},
+                        {'name': self.NOZZLE_DOWN,       'wait': 0.5, 'auto': True},
+                        {'name': self.SELENOID_ON,       'wait': 0.5, 'auto': True},
+                        {'name': self.NOZZLE_UP,         'wait': 0.5, 'auto': True},
+                        {'name': self.GO_BOTTOMCAM,      'wait': 0.5, 'auto': True},
+                        {'name': self.SET_ROTATION,      'wait': 0.5, 'auto': True},
                         {'name': self.FIX_CENTER,        'wait': 1.0, 'auto': False},
-                        {'name': self.GO_PCB_PLACE,      'wait': 1.0, 'auto': True},
+                        {'name': self.GO_BACK_PICK_PLACE,      'wait': 1.0, 'auto': True},
+                        # {'name': self.GO_PCB_PLACE,      'wait': 1.0, 'auto': True},
                         {'name': self.NOZZLE_DOWN2,      'wait': 1.0, 'auto': True},
                         {'name': self.SELENOID_OFF,      'wait': 1.0, 'auto': True},
                         {'name': self.FINISHED,          'wait': 1.0, 'auto': True} ]
@@ -33,6 +35,11 @@ class PNPWorker(QThread):
 
         self.mm_faktor_x = None
         self.mm_faktor_y = None
+
+
+        self.pick_pos_x = 0
+        self.pick_pos_y = 0
+
         
         # Runtime Parms
         self.next_step_enable = False
@@ -82,12 +89,22 @@ class PNPWorker(QThread):
         # mm_faktor = 52.0 / 1024.0   # mm per 1024 pixel depend on cam position
         x = (self.videoThreadTop.real_w / 2 - self.videoThreadTop.min_obj_x) * -1
         y = self.videoThreadTop.real_h / 2 - self.videoThreadTop.min_obj_y
-
         x_relativ_mm =  x * self.mm_faktor_x
         y_relativ_mm =  y * self.mm_faktor_y
 
 
         print("CENTER_TO_CLOSE",x_relativ_mm ,y_relativ_mm, self.videoThreadTop.real_w,self.videoThreadTop.real_h)
+        if(abs(x_relativ_mm) < 25 and abs(y_relativ_mm) < 25):
+            self.angel_from_pickup =  self.videoThreadTop.min_obj_angel
+            self.gcode.update_position_relative( x_relativ_mm , y_relativ_mm )  
+
+    def CENTER_TO_CLOSE2(self):      
+        print(self.state_idx,"CENTER_TO_CLOSE2")
+        x = (self.videoThreadTop.real_w / 2 - self.videoThreadTop.min_obj_x) * -1
+        y = self.videoThreadTop.real_h / 2 - self.videoThreadTop.min_obj_y
+        x_relativ_mm =  x * self.mm_faktor_x
+        y_relativ_mm =  y * self.mm_faktor_y
+        print("CENTER_TO_CLOSE2",x_relativ_mm ,y_relativ_mm, self.videoThreadTop.real_w,self.videoThreadTop.real_h)
         if(abs(x_relativ_mm) < 25 and abs(y_relativ_mm) < 25):
             self.angel_from_pickup =  self.videoThreadTop.min_obj_angel
             self.gcode.update_position_relative( x_relativ_mm , y_relativ_mm )  
@@ -98,6 +115,13 @@ class PNPWorker(QThread):
         print(self.state_idx,"GO_NOZZLE_OFFSET")
         self.gcode.driveto((self.gcode.x + self.gcode.headoffset_x ,
                             self.gcode.y + self.gcode.headoffset_y   ))
+        self.pick_pos_x = self.gcode.x
+        self.pick_pos_y = self.gcode.y
+
+    def GO_BACK_PICK_PLACE(self):     
+        print(self.state_idx,"GO_BACK_PICK_PLACE")
+        self.gcode.driveto((self.pick_pos_x  ,
+                            self.pick_pos_y   ))
 
     def NOZZLE_DOWN(self):          
         print(self.state_idx,"NOZZLE_DOWN", self.feeder.Z - self.footprint.Z)
@@ -114,7 +138,7 @@ class PNPWorker(QThread):
         self.gcode.driveto((self.gcode.bottom_cam_x,self.gcode.bottom_cam_y)) 
     def SET_ROTATION(self):      
         angle_from_pcb = self.position_part_on_pcb[2]    # Todo: need to check should be arround -90grad
-        angle_from_pcb = -90.0
+        #angle_from_pcb = -90.0
         print(self.state_idx,"SET_ROTATION", self.angel_from_pickup, angle_from_pcb)   
         self.gcode.update_rotation_relative(self.angel_from_pickup * -1 + angle_from_pcb ) 
     def FIX_CENTER(self):

@@ -107,15 +107,18 @@ class PNPGui():
         self.ui.slider_erode.valueChanged.connect(self.changeSlider4Vision)
         self.ui.check_toogle_cam.clicked.connect(self.on_check_toogle_cam)
         
-
-        
+    #@pyqtSlot(np.ndarray) ->
     def setImageToGUICamTop(self, image):
-        self.ui.videoframe.setPixmap(QPixmap.fromImage(image)) # TODO: check for Thread bug
+        qt_img = self.ui.videoframe.convert_cv_qt(image)
+        self.ui.videoframe.setPixmap(qt_img) # TODO: check for Thread bug
         self.th2.parms = self.videoParms2
         self.th2.mode=self.currentTab
         self.th2.start()
+    #@pyqtSlot(QImage)
+    #@pyqtSlot(np.ndarray) -> TypeError: connect() failed between VideoThread.changePixmap[numpy.ndarray] and setImageToGUICamTop()
     def setImageToGUICamBottom(self, image):
-        self.ui.videoframe_2.setPixmap(QPixmap.fromImage(image)) # TODO: check for Thread bug   
+        qt_img = self.ui.videoframe_2.convert_cv_qt(image)
+        self.ui.videoframe_2.setPixmap(qt_img) # TODO: check for Thread bug   
         self.th.parms = self.videoParms1
         self.th.mode  = self.currentTab
         self.worker.videoThreadTop = obj({  'min_obj_x'     : self.th.min_obj_x,
@@ -466,8 +469,8 @@ class PNPGui():
         pcb=0
         for p in range(pannel_x * pannel_y):
             # TODO: dont overwrite existing Fiducial Cords!
-            d.append((pcb ,'FD0', 68.44 , 53.99))
-            d.append((pcb ,'FD1', 31.75,  86.09))
+            d.append((pcb ,'FD0', 92.50 , 50.37))
+            d.append((pcb ,'FD1', 55.43,  82.67))
             pcb+=1
         # print(d)
         self.fiducials  = pd.DataFrame(d, columns=('PCB','Fiducial','X','Y'))

@@ -16,8 +16,8 @@ class PNPGCode():
         self.bottom_cam_x =   5.29        # machine parm
         self.bottom_cam_y =  33.96        # machine parm -> Drive Down with Nozzle before measure!
 
-        self.headoffset_x =  18.64        # machine parm
-        self.headoffset_y = -46.87        # machine parm
+        self.headoffset_x =  -5.41        # machine parm
+        self.headoffset_y = -43.33        # machine parm
         self.headoffset_active = False
 
         self.is_connected=False
@@ -43,8 +43,8 @@ class PNPGCode():
         if(sys.platform == 'darwin'): return    # avoid crashes on my mac
         if not self.is_connected:
             self.ser = serial.Serial(self.device, 115200)
-            self.readthread = threading.Thread(target=self.read_from_port, args=(self.ser,))
-            self.readthread.start()
+            #self.readthread = threading.Thread(target=self.read_from_port, args=(self.ser,))
+            #self.readthread.start()
             self.is_connected = True
         time.sleep(0.01)
         self.ser.write(gcode.encode('raw_unicode_escape'))

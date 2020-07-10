@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
 class VideoThread(QThread):
-    changePixmap = pyqtSignal(QImage)
+    changePixmap = pyqtSignal(np.ndarray)
 
     def __init__(self):
         super(QThread, self).__init__()
@@ -100,9 +100,9 @@ class VideoThread(QThread):
 
             self.draw_crosshair(rgbImage,w,h)
             bytesPerLine = ch * w
-            convertToQtFormat = QImage(rgbImage.data, w, h, bytesPerLine, QImage.Format_RGB888)
-            p = convertToQtFormat.scaled(1280, 960, Qt.KeepAspectRatio)
-            self.changePixmap.emit(p)
+            #convertToQtFormat = QImage(rgbImage.data, w, h, bytesPerLine, QImage.Format_RGB888)
+            #p = convertToQtFormat.scaled(1280, 960, Qt.KeepAspectRatio)
+            self.changePixmap.emit(rgbImage)
 
     def draw_crosshair(self,frame,w,h): #fadenkreuz, absehen
         cv2.line(img=frame, pt1=(0, int(h/2)), pt2=(w, int(h/2)), color=self.crosshair_color , thickness = 1, lineType = 8, shift = 0)
