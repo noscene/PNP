@@ -104,9 +104,12 @@ class PNPGCode():
         self.sendGCode(gcode,0)
     def rotateGrad(self,alpha):
         self.alpha = int(alpha)
+        if self.alpha > 360: self.alpha-=360
+        if self.alpha < 0:   self.alpha+=360
+
         gcode="G1 E"+ str(self.alpha) +" F1500 \r\n"
         self.sendGCode(gcode,0)
-        time.sleep(0.1)
+        #time.sleep(0.1)
     def motoroff(self):     self.sendGCode("M84\r\n",0)
     def goHome(self):  
         self.sendGCode("G28\r\n",0)

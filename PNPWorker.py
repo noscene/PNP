@@ -138,7 +138,7 @@ class PNPWorker(QThread):
         self.gcode.driveto((self.gcode.bottom_cam_x,self.gcode.bottom_cam_y)) 
     def SET_ROTATION(self):      
         angle_from_pcb = self.position_part_on_pcb[2]    # Todo: need to check should be arround -90grad
-        #angle_from_pcb = -90.0
+        angle_from_pcb = 0.0
         print(self.state_idx,"SET_ROTATION", self.angel_from_pickup, angle_from_pcb)   
         self.gcode.update_rotation_relative(self.angel_from_pickup * -1 + angle_from_pcb ) 
     def FIX_CENTER(self):

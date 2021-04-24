@@ -15,35 +15,6 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="5" column="0">
-     <widget class="QLabel_alterada" name="videoframe_2">
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>400</height>
-       </size>
-      </property>
-      <property name="text">
-       <string>.......MY VIDEO</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="0" rowspan="5">
-     <widget class="QLabel_alterada" name="videoframe">
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>400</height>
-       </size>
-      </property>
-      <property name="toolTipDuration">
-       <number>1</number>
-      </property>
-      <property name="text">
-       <string>.......MY VIDEO</string>
-      </property>
-     </widget>
-    </item>
     <item row="5" column="1">
      <widget class="QFrame" name="machine_ctrl">
       <property name="minimumSize">
@@ -543,6 +514,35 @@
       </widget>
      </widget>
     </item>
+    <item row="5" column="0">
+     <widget class="QLabel_alterada" name="videoframe_2">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>400</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>.......MY VIDEO</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0" rowspan="5">
+     <widget class="QLabel_alterada" name="videoframe">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>400</height>
+       </size>
+      </property>
+      <property name="toolTipDuration">
+       <number>1</number>
+      </property>
+      <property name="text">
+       <string>.......MY VIDEO</string>
+      </property>
+     </widget>
+    </item>
     <item row="4" column="1">
      <widget class="QLabel" name="status_label">
       <property name="minimumSize">
@@ -997,7 +997,7 @@
        </size>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>4</number>
       </property>
       <widget class="QWidget" name="tabpannel">
        <attribute name="title">
@@ -1061,7 +1061,7 @@
           <x>40</x>
           <y>150</y>
           <width>1141</width>
-          <height>531</height>
+          <height>821</height>
          </rect>
         </property>
         <property name="text">
@@ -1359,7 +1359,7 @@
        <widget class="QSlider" name="slider_s_max">
         <property name="geometry">
          <rect>
-          <x>740</x>
+          <x>640</x>
           <y>370</y>
           <width>521</width>
           <height>22</height>
@@ -1378,7 +1378,7 @@
        <widget class="QSlider" name="slider_h_max">
         <property name="geometry">
          <rect>
-          <x>740</x>
+          <x>640</x>
           <y>330</y>
           <width>521</width>
           <height>22</height>
@@ -1397,7 +1397,7 @@
        <widget class="QSlider" name="slider_v_max">
         <property name="geometry">
          <rect>
-          <x>740</x>
+          <x>640</x>
           <y>410</y>
           <width>521</width>
           <height>22</height>
@@ -1416,7 +1416,7 @@
        <widget class="QLabel" name="label_s_max">
         <property name="geometry">
          <rect>
-          <x>730</x>
+          <x>630</x>
           <y>350</y>
           <width>211</width>
           <height>16</height>
@@ -1429,7 +1429,7 @@
        <widget class="QLabel" name="label_h_max">
         <property name="geometry">
          <rect>
-          <x>730</x>
+          <x>630</x>
           <y>310</y>
           <width>261</width>
           <height>16</height>
@@ -1442,7 +1442,7 @@
        <widget class="QLabel" name="label_v_max">
         <property name="geometry">
          <rect>
-          <x>730</x>
+          <x>630</x>
           <y>390</y>
           <width>201</width>
           <height>16</height>
@@ -1496,7 +1496,7 @@
        <widget class="QSlider" name="slider_a_max">
         <property name="geometry">
          <rect>
-          <x>740</x>
+          <x>640</x>
           <y>470</y>
           <width>521</width>
           <height>22</height>
@@ -1553,7 +1553,7 @@
        <widget class="QLabel" name="label_a_max">
         <property name="geometry">
          <rect>
-          <x>730</x>
+          <x>630</x>
           <y>450</y>
           <width>211</width>
           <height>16</height>
@@ -1566,7 +1566,7 @@
        <widget class="QSlider" name="slider_a_fac">
         <property name="geometry">
          <rect>
-          <x>740</x>
+          <x>640</x>
           <y>510</y>
           <width>521</width>
           <height>22</height>
@@ -1585,7 +1585,7 @@
        <widget class="QLabel" name="label_a_fac">
         <property name="geometry">
          <rect>
-          <x>730</x>
+          <x>630</x>
           <y>490</y>
           <width>241</width>
           <height>16</height>
@@ -1598,7 +1598,7 @@
        <widget class="QSlider" name="slider_kernel">
         <property name="geometry">
          <rect>
-          <x>740</x>
+          <x>640</x>
           <y>660</y>
           <width>521</width>
           <height>22</height>
@@ -1623,7 +1623,7 @@
        <widget class="QLabel" name="label_kernel">
         <property name="geometry">
          <rect>
-          <x>730</x>
+          <x>630</x>
           <y>640</y>
           <width>191</width>
           <height>16</height>
@@ -1677,7 +1677,7 @@
        <widget class="QSlider" name="slider_canny_thrs2">
         <property name="geometry">
          <rect>
-          <x>740</x>
+          <x>640</x>
           <y>560</y>
           <width>521</width>
           <height>22</height>
@@ -1705,7 +1705,7 @@
        <widget class="QLabel" name="label_canny_thrs2">
         <property name="geometry">
          <rect>
-          <x>730</x>
+          <x>630</x>
           <y>540</y>
           <width>241</width>
           <height>16</height>
@@ -1746,7 +1746,7 @@
        <widget class="QLabel" name="label_erode">
         <property name="geometry">
          <rect>
-          <x>730</x>
+          <x>630</x>
           <y>580</y>
           <width>261</width>
           <height>16</height>
@@ -1772,7 +1772,7 @@
        <widget class="QSlider" name="slider_erode">
         <property name="geometry">
          <rect>
-          <x>740</x>
+          <x>640</x>
           <y>600</y>
           <width>521</width>
           <height>22</height>

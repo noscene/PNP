@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 import json
 import sys
+import subprocess
 import cv2
 import numpy as np
 import pandas as pd
@@ -36,6 +37,11 @@ class PNPGui():
         self.ui.pannel_update_bt.clicked.connect(self.loadFiducialList)
         self.ui.tabs.currentChanged.connect(self.onTabChange)
 
+        if(sys.platform == 'linux'):
+            command = "v4l2-ctl -d /dev/video0 -c exposure_auto=1"
+            output = subprocess.call(command, shell=True)
+            command = "v4l2-ctl -d /dev/video1 -c exposure_auto=1"
+            output = subprocess.call(command, shell=True)
 
 
         self.visionData={}

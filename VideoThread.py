@@ -32,7 +32,7 @@ class VideoThread(QThread):
         self.cap = cv2.VideoCapture(self.cam) # cv2.CAP_V4L on jetson
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH,self.w)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT,self.h)
-        self.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0 )   # disable auto belichtung
+        self.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25 )   # disable auto belichtung
 
     def run(self):
 
@@ -268,6 +268,12 @@ class VideoThread(QThread):
                     # draw min Rect rotated
                     rect = cv2.minAreaRect(approx)
                     
+
+                    (rect_x, rect_y), (rect_width, rect_height), rect_angle = rect
+                    rect_aspect_ratio = min(rect_width, rect_height) / max(rect_width, rect_height)
+
+
+
                     # https://www.pyimagesearch.com/2017/02/20/text-skew-correction-opencv-python/
                     angle = rect[-1]
                     if angle < -45: angle = -(90 + angle)
@@ -281,10 +287,13 @@ class VideoThread(QThread):
                     box = np.int0(box)
                     cv2.drawContours(imgContour,[box],0,(0,128,255),2)                
                     
-                    cv2.drawContours(imgContour, approx, -1, (0, 0, 255), 20)
+                    cv2.drawContours(imgContour, approx, -1, (0, 128, 255), 20)
                     objCor = len(approx)    # Kanten anzahl
                     x1, y1, w1, h1 = cv2.boundingRect(approx)
-                    cv2.putText(imgContour, str(objNumber) + ' ' + str(round(angle,1)) + ' ' + str(cX) + ' ' + str(cY)
+                    cv2.putText(imgContour, str(objNumber) + ' ' + str(round(angle,1)) + ' ' + 
+                                            str(round(rect_width,2)) + ' ' + 
+                                            str(round(rect_height,2)) + ' ' + 
+                                            str(round(rect_aspect_ratio,2))
                                 , (x1,y1), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255,255,255), 2, cv2.LINE_AA)
                 
                     # compute shortest Part
